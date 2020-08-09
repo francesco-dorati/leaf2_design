@@ -1,19 +1,23 @@
 <template>
     <div class="menu">
-        <a-menu
-      mode="inline"
-      :style="{
-        height: '65vh',
-        width: '240px',
-        margin: '10px 0',
-        padding: '5vh 0 15vh 0',
-        display: 'flex',
-        'justify-content': 'space-around',
-        'flex-wrap': 'wrap',
-        'box-sizing': 'content-box',
-      }"
-      :default-selected-keys="[active]"
-    >
+
+      <a-menu
+        mode="inline"
+        :style="{
+          height: '100vh',
+          width: '230px',
+          padding: '20px 0 100px 0',
+          display: 'flex',
+          justifyContent: 'space-around',
+          flexWrap: 'wrap',
+        }"
+        :default-selected-keys="[active]"
+      >
+
+        <Header
+          :style="{ marginRight: '80px', marginBottom: '20px' }"
+        />
+
         <a-menu-item
           key='Home'
           :style="{ padding: '10px 16px 10px 24px', 'box-sizing': 'content-box', }"
@@ -55,11 +59,15 @@
             Profile
           </router-link>
         </a-menu-item>
+
     </a-menu>
+
     </div>
 </template>
 
 <script>
+import Header from '@/components/Header.vue';
+
 export default {
   name: 'SideMenu',
   props: {
@@ -72,6 +80,9 @@ export default {
         return routes.includes(value);
       },
     },
+  },
+  components: {
+    Header,
   },
 };
 </script>

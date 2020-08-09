@@ -1,27 +1,24 @@
 <template>
-  <div class='main'>
-    <Header />
+  <div
+    class='main'
+    :style="{ width: '100vw', height: '100vh', display: 'flex' }"
+  >
 
-    <main
-      :style="{display: 'flex'}"
-    >
-      <SideMenu
-        :active="$route.name"
-      />
+    <SideMenu
+      :active="$route.name"
+      :style="{ height: '100%' }"
+    />
 
-      <router-view/>
-    </main>
+    <router-view />
 
   </div>
 </template>
 
 <script>
-import Header from '@/components/Header.vue';
 import SideMenu from '@/components/SideMenu.vue';
 
 export default {
   components: {
-    Header,
     SideMenu,
   },
 };

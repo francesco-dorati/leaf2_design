@@ -12,7 +12,6 @@ Vue.use(VueRouter);
 const routes = [
   {
     path: '/',
-    name: 'Main',
     component: Main,
     children: [
       {
@@ -34,6 +33,11 @@ const routes = [
       {
         path: 'profile',
         name: 'Profile',
+        component: Profile,
+      },
+      {
+        path: 'user/:username',
+        name: 'User',
         component: Profile,
       },
     ],
