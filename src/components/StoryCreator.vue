@@ -1,0 +1,672 @@
+<template>
+  <div
+    class="storyCreator"
+    :style="{
+      position: 'absolute',
+      height: '100vh',
+      width: '100vw',
+      top: '0',
+      left: '0',
+      backgroundColor: '#00000085',
+      backdropFilter: 'blur(10px)',
+    }"
+  >
+    <!-- ELEMENTS -->
+    <div
+      v-if="mode === 0"
+      :style="{
+        position: 'absolute',
+        left: 0,
+        width: '400px',
+        marginLeft: '40px',
+        marginTop: '20px',
+      }"
+    >
+
+      <h1 :style="{ color: 'white', fontSize: '250%', fontWeight: 'bolder' }">
+        Elements
+        <a-dropdown>
+          <a-icon
+            type="plus-circle"
+            :style="{ fontSize: '50%', verticalAlign: 'middle', cursor: 'pointer' }"
+          />
+          <a-menu slot="overlay">
+            <a-menu-item>
+              <a @click="createElementText">
+                <a-icon type="font-size" :style="{ marginRight: '10px' }" />
+                Text
+              </a>
+            </a-menu-item>
+            <a-menu-item>
+              <a @click="createElementImage">
+                <a-icon type="file-image" :style="{ marginRight: '10px' }" />
+                Image
+              </a>
+            </a-menu-item>
+          </a-menu>
+        </a-dropdown>
+      </h1>
+
+      <div
+        v-if="!elements.length"
+        :style="{
+          color: '#FFFFFF50',
+          fontSize: '16px',
+          fontWeight: 600,
+          textAlign: 'center',
+          marginTop: '200px',
+          width: '350px'
+        }"
+      >
+        <span :style="{ fontSize: '25px', textAlign: 'center', marginBottom: '20px' }">
+          no elements.
+        </span>
+
+        <br>
+
+        <span>
+          create one by clicking at the
+          <a-icon
+            type="plus-circle"
+            :style="{ fontSize: '80%', verticalAlign: 'middle', margin: '0 5px' }"
+          />
+          symbol
+        </span>
+      </div>
+
+      <!-- SINGLE ELEMENT -->
+      <a-card
+        v-for="element in elements"
+        :key="element.id"
+        :style="{ width: '350px', marginBottom: '30px' }"
+      >
+        <a-avatar
+          shape="square"
+          size="large"
+          src=""
+          :icon="element.type == 1 ? 'font-size' : 'file-image'"
+        />
+        <span
+          :style="{
+            display: 'inline-block',
+            verticalAlign: 'middle',
+            marginLeft: '10px',
+            color: 'rgba(0, 0, 0, 0.85)',
+            fontSize: '16px',
+            overflow: 'hidden',
+            fontWeight: 500,
+            whiteSpace: 'nowrap',
+            textOverflow: 'ellipsis',
+            width: '190px',
+          }"
+        >
+          {{ element.text || element.imageName || element.title }}
+        </span>
+        <a-tooltip title="Edit">
+          <a-icon type="edit" :style="{ marginLeft: '10px' }" @click="editElement(element.id)" />
+        </a-tooltip>
+        <a-tooltip title="Delete">
+          <a-icon
+            type="delete"
+            :style="{ marginLeft: '20px' }"
+            @click="deleteElement(element.id)"
+          />
+        </a-tooltip>
+      </a-card>
+      <!-- END SINGLE ELEMENT -->
+
+    </div>
+    <!-- END ELEMENTS -->
+
+    <!-- BACKGROUND COLOR -->
+    <div
+      v-if="mode === 0"
+      :style="{
+        position: 'absolute',
+        right: 0,
+        width: '400px',
+        marginLeft: '40px',
+        marginTop: '20px',
+      }"
+    >
+
+      <h1 :style="{ color: 'white', fontSize: '250%', fontWeight: 'bolder' }">
+        Background Color
+      </h1>
+      <div :style="{ marginTop: '25px', width: '350px' }" class="solid">
+        <span :style="{ color: 'white', fontSize: '18px', fontWeight: 600 }">
+          Solid:
+        </span>
+        <br>
+        <a-avatar
+          v-for="color in backgroundColors.slice(0, 12)"
+          :key="backgroundColors.indexOf(color)"
+          shape="circle"
+          :style="{
+            boxSizing: 'content-box',
+            background: color,
+            border: '2px white solid',
+            marginRight: '15px',
+            marginTop: '15px',
+          }"
+          @click="selectedBackgroundColor = backgroundColors.indexOf(color)"
+        >
+          <a-icon
+            v-if="backgroundColors[selectedBackgroundColor] === color"
+            type="check-circle"
+            theme="filled"
+            :style="{
+              fontSize: '20px',
+              marginTop: '6px',
+              color: color === 'white' ? 'black' : 'white'
+            }"
+          />
+        </a-avatar>
+      </div>
+
+      <div :style="{ marginTop: '50px', width: '350px' }" class="gradients">
+        <span :style="{ color: 'white', fontSize: '18px', fontWeight: 600 }">
+          Gradients:
+        </span>
+        <br>
+        <a-avatar
+          v-for="color in backgroundColors.slice(12, 24)"
+          :key="backgroundColors.indexOf(color)"
+          shape="circle"
+          :style="{
+            boxSizing: 'content-box',
+            background: color,
+            border: '2px white solid',
+            marginRight: '15px',
+            marginTop: '15px',
+          }"
+          @click="selectedBackgroundColor = backgroundColors.indexOf(color)"
+        >
+          <a-icon
+            v-if="backgroundColors[selectedBackgroundColor] === color"
+            type="check-circle"
+            theme="filled"
+            :style="{
+              fontSize: '20px',
+              marginTop: '6px',
+              color: color === 'white' ? 'black' : 'white'
+            }"
+          />
+        </a-avatar>
+      </div>
+
+    </div>
+    <!-- END BACKGROUND COLOR -->
+
+  <!-- EDIT ELEMENT -->
+    <div
+      v-if="mode === 1"
+      :style="{
+        position: 'absolute',
+        left: 0,
+        width: '400px',
+        marginLeft: '40px',
+        marginTop: '20px',
+      }"
+    >
+
+      <h2 :style="{ color: 'white', fontSize: '200%', fontWeight: 'bolder' }">
+        <a-icon
+          type="arrow-left"
+          :style="{ fontSize: '70%', verticalAlign: 'middle', marginRight: '15px' }"
+          @click="goBack"
+        />
+        Typography
+      </h2>
+
+      <div :style="{ marginTop: '40px' }" class="text">
+        <span :style="{ color: 'white', fontSize: '18px', fontWeight: 600 }">
+          Text:
+        </span>
+        <br>
+        <a-textarea
+          autofocus
+          placeholder="text to include"
+          :style="{ width: '286px', marginTop: '10px' }"
+          v-model="elements[indexOf(currentlyEditing)].text"
+        />
+      </div>
+
+      <div :style="{ width: '286px' }" class="divider">
+        <br>
+        <a-divider dashed/>
+      </div>
+
+      <div :style="{ marginTop: '30px' }" class="styles">
+        <span :style="{ color: 'white', fontSize: '18px', fontWeight: 600 }">
+          Styles:
+        </span>
+        <br>
+        <div :style="{ marginTop: '10px' }">
+          <a-radio-group
+            v-model="elements[indexOf(currentlyEditing)].align"
+          >
+            <a-radio-button  value="left">
+              <a-icon type="align-left" />
+            </a-radio-button>
+            <a-radio-button value="center">
+              <a-icon type="align-center" />
+            </a-radio-button>
+            <a-radio-button value="right">
+              <a-icon type="align-right" />
+            </a-radio-button>
+          </a-radio-group>
+
+          <a-button-group :style="{ marginLeft: '13px' }">
+            <a-button
+              :type="elements[indexOf(currentlyEditing)].bold ? 'primary' : 'default'"
+              @click="
+                elements[indexOf(currentlyEditing)].bold
+                =
+                !elements[indexOf(currentlyEditing)].bold
+              "
+            >
+              <a-icon type="bold" />
+            </a-button>
+            <a-button
+              :type="elements[indexOf(currentlyEditing)].italic ? 'primary' : 'default'"
+              @click="
+                elements[indexOf(currentlyEditing)].italic
+                =
+                !elements[indexOf(currentlyEditing)].italic
+              "
+            >
+              <a-icon type="italic" />
+            </a-button>
+            <a-button
+              :type="elements[indexOf(currentlyEditing)].underline ? 'primary' : 'default'"
+              @click="
+                elements[indexOf(currentlyEditing)].underline
+                =
+                !elements[indexOf(currentlyEditing)].underline
+              "
+            >
+              <a-icon type="underline" />
+            </a-button>
+          </a-button-group>
+        </div>
+      </div>
+
+      <br>
+
+      <div :style="{ marginTop: '20px' }" class="height">
+        <span :style="{ color: 'white', fontSize: '18px', fontWeight: 600 }">
+          Height:
+        </span>
+        <br>
+        <a-row :style="{ marginTop: '10px' }">
+          <a-col :span="11">
+            <a-slider
+              v-model="elements[indexOf(currentlyEditing)].margin"
+              :min="0"
+              :max="100"
+              :style="{ marginLeft: '0px' }"
+            />
+          </a-col>
+          <a-col :span="1">
+              <a-input-number
+                v-model="elements[indexOf(currentlyEditing)].margin"
+                :min="0"
+                :max="100"
+                :formatter="value => `${value}%`"
+                :parser="value => value.replace('%', '')"
+                :style="{ marginLeft: '10px' }"
+              />
+          </a-col>
+        </a-row>
+      </div>
+
+      <br>
+
+      <div :style="{ marginTop: '20px' }" class="size">
+        <span :style="{ color: 'white', fontSize: '18px', fontWeight: 600 }">
+          Size:
+        </span>
+        <br>
+        <a-row :style="{ marginTop: '10px' }">
+          <a-col :span="11">
+            <a-slider
+              v-model="elements[indexOf(currentlyEditing)].size"
+              :min="1"
+              :max="150"
+              :style="{ marginLeft: '0px' }"
+            />
+          </a-col>
+          <a-col :span="1">
+            <a-input-number
+              v-model="elements[indexOf(currentlyEditing)].size"
+              :min="1"
+              :max="150"
+              :formatter="value => `${value}px`"
+              :parser="value => value.replace('px', '')"
+              :style="{ marginLeft: '10px' }"
+            />
+          </a-col>
+        </a-row>
+      </div>
+
+    </div>
+  <!-- END EDIT ELEMENT  -->
+
+  <!-- EDIT ELEMENT COLOR -->
+    <div
+      v-if="mode === 1"
+      :style="{
+        position: 'absolute',
+        right: 0,
+        width: '400px',
+        marginLeft: '40px',
+        marginTop: '20px',
+      }"
+    >
+
+      <h2 :style="{ color: 'white', fontSize: '200%', fontWeight: 'bolder' }">
+        Color
+      </h2>
+
+      <div :style="{ marginTop: '25px', width: '350px' }" class="solid">
+        <span :style="{ color: 'white', fontSize: '18px', fontWeight: 600 }">
+          Solid:
+        </span>
+        <br>
+        <a-avatar
+          v-for="color in colors"
+          :key="colors.indexOf(color)"
+          shape="circle"
+          :style="{
+            boxSizing: 'content-box',
+            background: color,
+            border: '2px white solid',
+            marginRight: '15px',
+            marginTop: '15px',
+          }"
+          @click="elements[indexOf(currentlyEditing)].color = colors.indexOf(color)"
+        >
+          <a-icon
+            v-if="colors[elements[indexOf(currentlyEditing)].color] === color"
+            type="check-circle"
+            theme="filled"
+            :style="{
+              fontSize: '20px',
+              marginTop: '6px',
+              color: color === 'white' ? 'black' : 'white'
+            }"
+          />
+        </a-avatar>
+      </div>
+
+    </div>
+  <!-- END EDIT ELEMENT COLOR -->
+
+  <!-- EDIT ELEMENT -->
+    <div
+      v-if="mode === 2"
+      :style="{
+        position: 'absolute',
+        left: 0,
+        width: '400px',
+        marginLeft: '40px',
+        marginTop: '20px',
+      }"
+    >
+
+      <h2 :style="{ color: 'white', fontSize: '200%', fontWeight: 'bolder' }">
+        <a-icon
+          type="arrow-left"
+          :style="{ fontSize: '70%', verticalAlign: 'middle', marginRight: '15px' }"
+          @click="goBack"
+        />
+        Image
+      </h2>
+
+      <!-- <a-upload
+        name="file"
+        accept="image/*"
+        :fileList="files"
+        action="https://www.mocky.io/v2/5cc8019d300000980a055e76"
+        @change="upload"
+      >
+      <a-button> <a-icon type="upload" /> Click to Upload </a-button>
+      </a-upload> -->
+      <a-upload
+        name="avatar"
+        list-type="picture-card"
+        class="avatar-uploader"
+        :show-upload-list="false"
+        action="http://localhost:8081/api/posts/image"
+        @change="handleChange"
+      >
+        <img
+          v-if="elements[indexOf(currentlyEditing)].imageUrl"
+          :src="elements[indexOf(currentlyEditing)].imageUrl"
+          alt="avatar"
+          :style="{ height: '110px', borderRadius: '4px' }"
+        />
+        <div v-else>
+          <a-icon :type="elements[indexOf(currentlyEditing)].loading ? 'loading' : 'plus'" />
+          <div class="ant-upload-text">
+            Upload
+          </div>
+        </div>
+      </a-upload>
+
+    </div>
+    <!-- END EDIT ELEMENT  -->
+
+    <!-- STORY  PREVIEW -->
+    <div
+      :style="{
+        position: 'absolute',
+        height: '100vh',
+        width: '500px',
+        top: '0',
+        left: '0',
+        right: '0',
+        marginLeft: 'auto',
+        marginRight: 'auto',
+        background: backgroundColors[selectedBackgroundColor],
+      }"
+    >
+      <!-- <div :style="{ position: 'absolute', zIndex: '99' }" >
+        <a-avatar
+          src="https://weneedfun.com/wp-content/uploads/2016/01/Pink-Flower-17.jpg"
+          :style="{ border: 'white 1px solid', margin: '10px' }"
+        />
+        <span :style="{ color: 'white', fontWeight: 'bold' }">
+          username
+        </span>
+      </div> -->
+
+      <div
+        :style="{
+          height: '100%',
+          width: '90%',
+          margin: 'auto'
+        }"
+      >
+      <span
+        v-for="element in elements"
+        :key="element.id"
+      >
+        <span
+          v-if="element.type === 1"
+          :style="{
+            position:'absolute',
+            display: 'block',
+            width: '90%',
+            padding: '0',
+
+            color: colors[element.color],
+            textAlign:  element.align,
+            fontSize: `${element.size}px`,
+            marginTop: `${element.margin}vh`,
+            fontWeight: element.bold ? 'bold' : 'normal',
+            fontStyle: element.italic ? 'italic' : 'normal',
+            textDecoration: element.underline ? 'underline' : 'none',
+          }"
+        >
+          {{ element.text }}
+        </span>
+
+        <img
+          v-if="element.type === 2"
+          :src="element.imageUrl"
+          :style="{
+            position: 'absolute',
+            maxWidth: '500px',
+            height: '200px'
+          }"
+        >
+      </span>
+
+      </div>
+
+    </div>
+    <!-- END STORY PREVIEW -->
+
+  </div>
+  <!-- END CREATE STORY -->
+
+</template>
+
+<script>
+const getBase64 = (img, callback) => {
+  const reader = new FileReader();
+  reader.addEventListener('load', () => callback(reader.result));
+  reader.readAsDataURL(img);
+};
+
+export default {
+  name: 'StoryCreator',
+
+  data() {
+    return {
+      mode: 0,
+      currentlyEditing: 0,
+      elements: [],
+      colors: [
+        'white',
+        'black',
+        '#eb3b5a',
+        '#20bf6b',
+        '#3867d6',
+        '#f7b731',
+        '#fa8231',
+        '#8854d0',
+        '#2d98da',
+        '#0fb9b1',
+        '#4b6584',
+        '#a5b1c2',
+      ],
+      backgroundColors: [
+        'white',
+        'black',
+        '#eb3b5a',
+        '#20bf6b',
+        '#3867d6',
+        '#f7b731',
+        '#fa8231',
+        '#8854d0',
+        '#2d98da',
+        '#0fb9b1',
+        '#4b6584',
+        '#a5b1c2',
+        'linear-gradient(45deg, #119DA4, #04B46D ,  #FBF33C)',
+        'linear-gradient(45deg, #FF1F01,#FD5D1B , #FFC700)',
+        'linear-gradient(45.34deg, #EA52F8 5.66%, #0066FF 94.35%)',
+        'linear-gradient(45.34deg, #1D2252 5.66%, #72AAFF 50.01%, #00FFFF 94.35%)',
+        'linear-gradient(45.34deg, #FBB13C 5.66%, #FF7A72 48.62%, #FF7A72 94.35%)',
+        'linear-gradient(223.88deg, #FF149D 8.89%, #620F32 94.31%)',
+      ],
+      selectedBackgroundColor: 0,
+    };
+  },
+
+  methods: {
+    createElementText() {
+      const { length } = this.elements;
+      this.elements.push({
+        id: length,
+        type: 1,
+        title: `Element ${length + 1}`,
+        text: '',
+        align: 'center',
+        bold: true,
+        italic: false,
+        underline: false,
+        margin: 20,
+        size: 50,
+        color: 1,
+      });
+      this.mode = 1;
+      this.currentlyEditing = length;
+    },
+
+    createElementImage() {
+      const { length } = this.elements;
+      this.elements.push({
+        id: length,
+        type: 2,
+        title: `Element ${length + 1}`,
+        imageName: '',
+        imageUrl: '',
+        loading: false,
+      });
+      this.mode = 2;
+      this.currentlyEditing = length;
+    },
+
+    editElement(id) {
+      this.mode = this.elements[this.indexOf(id)].type;
+      this.currentlyEditing = id;
+    },
+
+    deleteElement(id) {
+      this.elements = this.elements.filter((element) => element.id !== id);
+    },
+
+    goBack() {
+      this.mode = 0;
+      this.currentlyEditing = null;
+    },
+
+    indexOf(id) {
+      return this.elements.findIndex((element) => element.id === id);
+    },
+
+    handleChange(info) {
+      if (info.file.status === 'uploading') {
+        this.elements[this.indexOf(this.currentlyEditing)].loading = true;
+      } else if (info.file.status === 'done') {
+        getBase64(info.file.originFileObj, (imageUrl) => {
+          this.elements[this.indexOf(this.currentlyEditing)].imageUrl = imageUrl;
+          this.elements[this.indexOf(this.currentlyEditing)].loading = false;
+        });
+
+        this.elements[this.indexOf(this.currentlyEditing)].imageName = info.file.name;
+      }
+    },
+
+  },
+};
+</script>
+
+<style lang="css">
+.avatar-uploader > .ant-upload {
+  width: 128px;
+  height: 128px;
+}
+.ant-upload-select-picture-card i {
+  font-size: 32px;
+  color: #999;
+}
+.ant-upload-select-picture-card .ant-upload-text {
+  margin-top: 8px;
+  color: #666;
+}
+</style>

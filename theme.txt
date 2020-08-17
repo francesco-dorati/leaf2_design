@@ -1,0 +1,2 @@
+html attributes italic
+html tags red

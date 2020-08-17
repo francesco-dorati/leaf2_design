@@ -51,7 +51,7 @@
 </template>
 
 <script>
-import Post from '@/components/Post.vue';
+// import Post from '@/components/Post.vue';
 import Stories from '@/components/Stories.vue';
 import http from '@/axios.config.js';
 
@@ -64,8 +64,8 @@ export default {
   },
 
   components: {
-    Post,
-    Stories
+    // Post,
+    Stories,
   },
 
   async created() {
