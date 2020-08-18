@@ -11,7 +11,7 @@
       backdropFilter: 'blur(10px)',
     }"
   >
-    <!-- ELEMENTS -->
+    <!-- Elements -->
     <div
       v-if="mode === 0"
       :style="{
@@ -23,6 +23,7 @@
       }"
     >
 
+      <!-- Title & Dropdown -->
       <h1 :style="{ color: 'white', fontSize: '250%', fontWeight: 'bolder' }">
         Elements
         <a-dropdown>
@@ -47,6 +48,7 @@
         </a-dropdown>
       </h1>
 
+      <!-- If no Elements -->
       <div
         v-if="!elements.length"
         :style="{
@@ -61,9 +63,7 @@
         <span :style="{ fontSize: '25px', textAlign: 'center', marginBottom: '20px' }">
           no elements.
         </span>
-
         <br>
-
         <span>
           create one by clicking at the
           <a-icon
@@ -74,7 +74,7 @@
         </span>
       </div>
 
-      <!-- SINGLE ELEMENT -->
+      <!-- Single Element -->
       <a-card
         v-for="element in elements"
         :key="element.id"
@@ -113,12 +113,12 @@
           />
         </a-tooltip>
       </a-card>
-      <!-- END SINGLE ELEMENT -->
+      <!-- END Single Elements -->
 
     </div>
-    <!-- END ELEMENTS -->
+    <!-- END Elements -->
 
-    <!-- BACKGROUND COLOR -->
+    <!-- Background Color -->
     <div
       v-if="mode === 0"
       :style="{
@@ -133,6 +133,7 @@
       <h1 :style="{ color: 'white', fontSize: '250%', fontWeight: 'bolder' }">
         Background Color
       </h1>
+      <!-- Solid Colors -->
       <div :style="{ marginTop: '25px', width: '350px' }" class="solid">
         <span :style="{ color: 'white', fontSize: '18px', fontWeight: 600 }">
           Solid:
@@ -163,7 +164,7 @@
           />
         </a-avatar>
       </div>
-
+      <!-- Gradien Colors -->
       <div :style="{ marginTop: '50px', width: '350px' }" class="gradients">
         <span :style="{ color: 'white', fontSize: '18px', fontWeight: 600 }">
           Gradients:
@@ -196,9 +197,9 @@
       </div>
 
     </div>
-    <!-- END BACKGROUND COLOR -->
+    <!-- END Background Color -->
 
-  <!-- EDIT ELEMENT -->
+    <!-- Edit Text -- Typography -->
     <div
       v-if="mode === 1"
       :style="{
@@ -210,6 +211,7 @@
       }"
     >
 
+      <!-- Title -->
       <h2 :style="{ color: 'white', fontSize: '200%', fontWeight: 'bolder' }">
         <a-icon
           type="arrow-left"
@@ -219,6 +221,7 @@
         Typography
       </h2>
 
+      <!-- Typography -- Text Input -->
       <div :style="{ marginTop: '40px' }" class="text">
         <span :style="{ color: 'white', fontSize: '18px', fontWeight: 600 }">
           Text:
@@ -232,17 +235,20 @@
         />
       </div>
 
+      <!-- Typography -- Divider -->
       <div :style="{ width: '286px' }" class="divider">
         <br>
         <a-divider dashed/>
       </div>
 
+      <!-- Typography -- Alignment & Style -->
       <div :style="{ marginTop: '30px' }" class="styles">
         <span :style="{ color: 'white', fontSize: '18px', fontWeight: 600 }">
           Styles:
         </span>
         <br>
         <div :style="{ marginTop: '10px' }">
+          <!-- Typography -- Alignment -->
           <a-radio-group
             v-model="elements[indexOf(currentlyEditing)].align"
           >
@@ -256,7 +262,7 @@
               <a-icon type="align-right" />
             </a-radio-button>
           </a-radio-group>
-
+          <!-- Typography -- Style -->
           <a-button-group :style="{ marginLeft: '13px' }">
             <a-button
               :type="elements[indexOf(currentlyEditing)].bold ? 'primary' : 'default'"
@@ -294,6 +300,7 @@
 
       <br>
 
+      <!-- Typography -- Height -->
       <div :style="{ marginTop: '20px' }" class="height">
         <span :style="{ color: 'white', fontSize: '18px', fontWeight: 600 }">
           Height:
@@ -323,6 +330,7 @@
 
       <br>
 
+      <!-- Typography -- Size -->
       <div :style="{ marginTop: '20px' }" class="size">
         <span :style="{ color: 'white', fontSize: '18px', fontWeight: 600 }">
           Size:
@@ -351,9 +359,9 @@
       </div>
 
     </div>
-  <!-- END EDIT ELEMENT  -->
+  <!-- END Edit Text -- Typography  -->
 
-  <!-- EDIT ELEMENT COLOR -->
+  <!-- Edit Text -- Color -->
     <div
       v-if="mode === 1"
       :style="{
@@ -364,11 +372,12 @@
         marginTop: '20px',
       }"
     >
-
+      <!-- Text Color -- Title -->
       <h2 :style="{ color: 'white', fontSize: '200%', fontWeight: 'bolder' }">
         Color
       </h2>
 
+      <!-- Text Color -->
       <div :style="{ marginTop: '25px', width: '350px' }" class="solid">
         <span :style="{ color: 'white', fontSize: '18px', fontWeight: 600 }">
           Solid:
@@ -401,9 +410,9 @@
       </div>
 
     </div>
-  <!-- END EDIT ELEMENT COLOR -->
+  <!-- END Edit Element -- Color -->
 
-  <!-- EDIT ELEMENT -->
+    <!-- Edit Element -- Image Upload -->
     <div
       v-if="mode === 2"
       :style="{
@@ -414,7 +423,7 @@
         marginTop: '20px',
       }"
     >
-
+      <!-- Image -- Title -->
       <h2 :style="{ color: 'white', fontSize: '200%', fontWeight: 'bolder' }">
         <a-icon
           type="arrow-left"
@@ -423,7 +432,8 @@
         />
         Image
       </h2>
-      <!-- Round the image, circle the image-->
+
+      <!-- Image -- Upload -->
       <a-upload
         name="avatar"
         list-type="picture-card"
@@ -431,6 +441,7 @@
         class="avatar-uploader"
         :show-upload-list="false"
         action="http://localhost:8081/api/posts/image"
+        :style="{ marginTop: '30px' }"
         @change="upload"
       >
         <img
@@ -447,107 +458,189 @@
         </div>
       </a-upload>
 
-      <a-radio-group
-        v-model="elements[indexOf(currentlyEditing)].rounded"
-        v-if="elements[indexOf(currentlyEditing)].imageUrl"
-      >
-        <a-radio-button :value="0">
-          Normal
-        </a-radio-button>
-        <a-radio-button :value="1">
-          Rounded
-        </a-radio-button>
-        <a-radio-button :value="2">
-          Circle
-        </a-radio-button>
-      </a-radio-group>
+      <!-- Image -- Divider -->
+      <div :style="{ width: '286px' }" class="divider">
+        <br>
+        <a-divider dashed/>
+      </div>
 
-      <a-row :style="{ marginTop: '10px' }">
-        <a-col :span="11">
-          <a-slider
-            v-model="elements[indexOf(currentlyEditing)].width"
-            v-if="elements[indexOf(currentlyEditing)].imageUrl"
-            :min="0"
-            :max="450"
-            :disabled="elements[indexOf(currentlyEditing)].background"
-            :style="{ marginLeft: '0px' }"
-          />
-        </a-col>
-        <a-col :span="1">
-          <a-input-number
-            v-model="elements[indexOf(currentlyEditing)].width"
-            v-if="elements[indexOf(currentlyEditing)].imageUrl"
-            :min="0"
-            :max="450"
-            :formatter="value => `${value}px`"
-            :parser="value => value.replace('px', '')"
-            :disabled="elements[indexOf(currentlyEditing)].background"
-            :style="{ marginLeft: '10px' }"
-          />
-        </a-col>
-      </a-row>
+      <!-- Image -- Border -->
+      <div :style="{ marginTop: '' }">
+        <span :style="{ color: 'white', fontSize: '18px', fontWeight: 600 }">
+          Border:
+        </span>
+        <br>
+        <a-radio-group
+          v-model="elements[indexOf(currentlyEditing)].rounded"
+          :disabled="
+            elements[indexOf(currentlyEditing)].background
+            ||
+            !elements[indexOf(currentlyEditing)].imageUrl
+          "
+          :style="{ marginTop: '10px' }"
+        >
+          <a-radio-button :value="0">
+            Normal
+          </a-radio-button>
+          <a-radio-button :value="1">
+            Rounded
+          </a-radio-button>
+          <a-radio-button :value="2">
+            Circle
+          </a-radio-button>
+        </a-radio-group>
+      </div>
 
-      <a-row :style="{ marginTop: '10px' }">
-        <a-col :span="11">
-          <a-slider
-            v-model="elements[indexOf(currentlyEditing)].marginX"
-            v-if="elements[indexOf(currentlyEditing)].imageUrl"
-            :min="0"
-            :max="450 - elements[indexOf(currentlyEditing)].width"
-            :disabled="elements[indexOf(currentlyEditing)].background"
-            :style="{ marginLeft: '0px' }"
-          />
-        </a-col>
-        <a-col :span="1">
-          <a-input-number
-            v-model="elements[indexOf(currentlyEditing)].marginX"
-            v-if="elements[indexOf(currentlyEditing)].imageUrl"
-            :min="0"
-            :max="450 - elements[indexOf(currentlyEditing)].width"
-            :formatter="value => `${value}px`"
-            :parser="value => value.replace('px', '')"
-            :disabled="elements[indexOf(currentlyEditing)].background"
-            :style="{ marginLeft: '10px' }"
-          />
-        </a-col>
-      </a-row>
-
-      <a-row :style="{ marginTop: '10px' }">
-        <a-col :span="11">
-          <a-slider
-            v-model="elements[indexOf(currentlyEditing)].marginY"
-            v-if="elements[indexOf(currentlyEditing)].imageUrl"
-            :min="0"
-            :max="100"
-            :disabled="elements[indexOf(currentlyEditing)].background"
-            :style="{ marginLeft: '0px' }"
-          />
-        </a-col>
-        <a-col :span="1">
-          <a-input-number
-            v-model="elements[indexOf(currentlyEditing)].marginY"
-            v-if="elements[indexOf(currentlyEditing)].imageUrl"
-            :min="0"
-            :max="100"
-            :formatter="value => `${value}%`"
-            :parser="value => value.replace('%', '')"
-            :disabled="elements[indexOf(currentlyEditing)].background"
-            :style="{ marginLeft: '10px' }"
-          />
-        </a-col>
-      </a-row>
-
-      <a-checkbox
-        v-if="elements[indexOf(currentlyEditing)].imageUrl"
-        @change="makeBackground"
-      >
-        Background
-      </a-checkbox>
+      <!-- Image -- Width -->
+      <div :style="{ marginTop: '30px' }">
+        <span :style="{ color: 'white', fontSize: '18px', fontWeight: 600 }">
+          Width:
+        </span>
+        <br>
+        <a-row>
+          <a-col :span="11">
+            <a-slider
+              v-model="elements[indexOf(currentlyEditing)].width"
+              :min="0"
+              :max="450"
+              :disabled="
+                elements[indexOf(currentlyEditing)].background
+                ||
+                !elements[indexOf(currentlyEditing)].imageUrl
+              "
+              :style="{ marginLeft: '0px' }"
+            />
+          </a-col>
+          <a-col :span="1">
+            <a-input-number
+              v-model="elements[indexOf(currentlyEditing)].width"
+              :min="0"
+              :max="450"
+              :formatter="value => `${value}px`"
+              :parser="value => value.replace('px', '')"
+              :disabled="
+                elements[indexOf(currentlyEditing)].background
+                ||
+                !elements[indexOf(currentlyEditing)].imageUrl
+              "
+              :style="{ marginLeft: '10px' }"
+            />
+          </a-col>
+        </a-row>
+      </div>
 
     </div>
-    <!-- END EDIT ELEMENT  -->
+    <!-- END Edit Element -- Image -->
 
-    <!-- STORY  PREVIEW -->
+    <!-- Edit Element -- Image Position -->
+    <div
+      v-if="mode === 2"
+      :style="{
+        position: 'absolute',
+        right: 0,
+        width: '400px',
+        marginLeft: '40px',
+        marginTop: '20px',
+      }"
+    >
+      <!-- Image Position -- Title -->
+      <h2 :style="{ color: 'white', fontSize: '200%', fontWeight: 'bolder' }">
+        Position
+      </h2>
+
+      <!-- Image Position -- Margin X -->
+      <div :style="{ marginTop: '30px' }">
+        <span :style="{ color: 'white', fontSize: '18px', fontWeight: 600 }">
+          <a-icon type="arrows-alt" rotate="45" :style="{ marginRight: '10px' }" />
+          Margin X:
+        </span>
+        <br>
+        <a-row>
+          <a-col :span="11">
+            <a-slider
+              v-model="elements[indexOf(currentlyEditing)].marginX"
+              :min="0"
+              :max="450 - elements[indexOf(currentlyEditing)].width"
+              :disabled="
+                elements[indexOf(currentlyEditing)].background
+                ||
+                !elements[indexOf(currentlyEditing)].imageUrl
+              "
+              :style="{ marginLeft: '0px' }"
+            />
+          </a-col>
+          <a-col :span="1">
+            <a-input-number
+              v-model="elements[indexOf(currentlyEditing)].marginX"
+              :min="0"
+              :max="450 - elements[indexOf(currentlyEditing)].width"
+              :formatter="value => `${value}px`"
+              :parser="value => value.replace('px', '')"
+              :disabled="
+                elements[indexOf(currentlyEditing)].background
+                ||
+                !elements[indexOf(currentlyEditing)].imageUrl
+              "
+              :style="{ marginLeft: '10px' }"
+            />
+          </a-col>
+        </a-row>
+      </div>
+
+      <!-- Image Position -- Margin Y -->
+      <div :style="{ marginTop: '30px' }">
+        <span :style="{ color: 'white', fontSize: '18px', fontWeight: 600 }">
+          <a-icon type="arrows-alt" rotate="-45" :style="{ marginRight: '10px' }" />
+          Margin Y:
+        </span>
+        <br>
+        <a-row>
+          <a-col :span="11">
+            <a-slider
+              v-model="elements[indexOf(currentlyEditing)].marginY"
+              :min="0"
+              :max="100"
+              :disabled="
+                elements[indexOf(currentlyEditing)].background
+                ||
+                !elements[indexOf(currentlyEditing)].imageUrl
+              "
+              :style="{ marginLeft: '0px' }"
+            />
+          </a-col>
+          <a-col :span="1">
+            <a-input-number
+              v-model="elements[indexOf(currentlyEditing)].marginY"
+              :min="0"
+              :max="100"
+              :formatter="value => `${value}%`"
+              :parser="value => value.replace('%', '')"
+              :disabled="
+                elements[indexOf(currentlyEditing)].background
+                ||
+                !elements[indexOf(currentlyEditing)].imageUrl
+              "
+              :style="{ marginLeft: '10px' }"
+            />
+          </a-col>
+        </a-row>
+      </div>
+
+      <!-- Image Position -- Background -->
+      <a-button
+        :type="elements[indexOf(currentlyEditing)].background ? 'primary' : 'default'"
+        :disabled="!elements[indexOf(currentlyEditing)].imageUrl"
+        :style="{ width: '284px', marginTop: '30px' }"
+        @click="makeBackground"
+        block
+      >
+        Make as Background
+      </a-button>
+
+    </div>
+    <!-- END Edit Element -- Image Position -->
+
+    <!-- Story Preview -->
     <div
       :style="{
         position: 'absolute',
@@ -561,7 +654,7 @@
         background: backgroundColors[selectedBackgroundColor],
       }"
     >
-      <!-- USERNAME -->
+      <!-- User -->
       <!-- <div :style="{ position: 'absolute', zIndex: '99' }" >
         <a-avatar
           src="https://weneedfun.com/wp-content/uploads/2016/01/Pink-Flower-17.jpg"
@@ -572,6 +665,7 @@
         </span>
       </div> -->
 
+      <!-- Elements Container -->
       <div
         :style="{
           height: '100%',
@@ -579,11 +673,12 @@
           margin: 'auto'
         }"
       >
-      <!-- Element -->
+      <!-- Single Element -->
       <span
         v-for="element in elements"
         :key="element.id"
       >
+        <!-- Text Element -->
         <span
           v-if="element.type === 1"
           :style="{
@@ -604,6 +699,7 @@
           {{ element.text }}
         </span>
 
+        <!-- Image Element -->
         <img
           v-if="element.type === 2"
           :src="element.imageUrl"
@@ -621,15 +717,14 @@
           }"
         >
       </span>
-      <!-- End Element -->
+      <!-- END Element-->
 
       </div>
 
     </div>
-    <!-- END STORY PREVIEW -->
+    <!-- END Story Preview -->
 
   </div>
-  <!-- END CREATE STORY -->
 
 </template>
 
