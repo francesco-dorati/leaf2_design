@@ -5,8 +5,8 @@
       <template #renderEmpty>
         <div style="text-align: center">
           <a-list>
-            <a-list-item >
-              <a-skeleton avatar active  />
+            <a-list-item>
+              <a-skeleton avatar active/>
             </a-list-item>
           </a-list>
         </div>

@@ -423,23 +423,15 @@
         />
         Image
       </h2>
-
-      <!-- <a-upload
-        name="file"
-        accept="image/*"
-        :fileList="files"
-        action="https://www.mocky.io/v2/5cc8019d300000980a055e76"
-        @change="upload"
-      >
-      <a-button> <a-icon type="upload" /> Click to Upload </a-button>
-      </a-upload> -->
+      <!-- Round the image, circle the image-->
       <a-upload
         name="avatar"
         list-type="picture-card"
+        accept="image/*"
         class="avatar-uploader"
         :show-upload-list="false"
         action="http://localhost:8081/api/posts/image"
-        @change="handleChange"
+        @change="upload"
       >
         <img
           v-if="elements[indexOf(currentlyEditing)].imageUrl"
@@ -454,6 +446,103 @@
           </div>
         </div>
       </a-upload>
+
+      <a-radio-group
+        v-model="elements[indexOf(currentlyEditing)].rounded"
+        v-if="elements[indexOf(currentlyEditing)].imageUrl"
+      >
+        <a-radio-button :value="0">
+          Normal
+        </a-radio-button>
+        <a-radio-button :value="1">
+          Rounded
+        </a-radio-button>
+        <a-radio-button :value="2">
+          Circle
+        </a-radio-button>
+      </a-radio-group>
+
+      <a-row :style="{ marginTop: '10px' }">
+        <a-col :span="11">
+          <a-slider
+            v-model="elements[indexOf(currentlyEditing)].width"
+            v-if="elements[indexOf(currentlyEditing)].imageUrl"
+            :min="0"
+            :max="450"
+            :disabled="elements[indexOf(currentlyEditing)].background"
+            :style="{ marginLeft: '0px' }"
+          />
+        </a-col>
+        <a-col :span="1">
+          <a-input-number
+            v-model="elements[indexOf(currentlyEditing)].width"
+            v-if="elements[indexOf(currentlyEditing)].imageUrl"
+            :min="0"
+            :max="450"
+            :formatter="value => `${value}px`"
+            :parser="value => value.replace('px', '')"
+            :disabled="elements[indexOf(currentlyEditing)].background"
+            :style="{ marginLeft: '10px' }"
+          />
+        </a-col>
+      </a-row>
+
+      <a-row :style="{ marginTop: '10px' }">
+        <a-col :span="11">
+          <a-slider
+            v-model="elements[indexOf(currentlyEditing)].marginX"
+            v-if="elements[indexOf(currentlyEditing)].imageUrl"
+            :min="0"
+            :max="450 - elements[indexOf(currentlyEditing)].width"
+            :disabled="elements[indexOf(currentlyEditing)].background"
+            :style="{ marginLeft: '0px' }"
+          />
+        </a-col>
+        <a-col :span="1">
+          <a-input-number
+            v-model="elements[indexOf(currentlyEditing)].marginX"
+            v-if="elements[indexOf(currentlyEditing)].imageUrl"
+            :min="0"
+            :max="450 - elements[indexOf(currentlyEditing)].width"
+            :formatter="value => `${value}px`"
+            :parser="value => value.replace('px', '')"
+            :disabled="elements[indexOf(currentlyEditing)].background"
+            :style="{ marginLeft: '10px' }"
+          />
+        </a-col>
+      </a-row>
+
+      <a-row :style="{ marginTop: '10px' }">
+        <a-col :span="11">
+          <a-slider
+            v-model="elements[indexOf(currentlyEditing)].marginY"
+            v-if="elements[indexOf(currentlyEditing)].imageUrl"
+            :min="0"
+            :max="100"
+            :disabled="elements[indexOf(currentlyEditing)].background"
+            :style="{ marginLeft: '0px' }"
+          />
+        </a-col>
+        <a-col :span="1">
+          <a-input-number
+            v-model="elements[indexOf(currentlyEditing)].marginY"
+            v-if="elements[indexOf(currentlyEditing)].imageUrl"
+            :min="0"
+            :max="100"
+            :formatter="value => `${value}%`"
+            :parser="value => value.replace('%', '')"
+            :disabled="elements[indexOf(currentlyEditing)].background"
+            :style="{ marginLeft: '10px' }"
+          />
+        </a-col>
+      </a-row>
+
+      <a-checkbox
+        v-if="elements[indexOf(currentlyEditing)].imageUrl"
+        @change="makeBackground"
+      >
+        Background
+      </a-checkbox>
 
     </div>
     <!-- END EDIT ELEMENT  -->
@@ -472,6 +561,7 @@
         background: backgroundColors[selectedBackgroundColor],
       }"
     >
+      <!-- USERNAME -->
       <!-- <div :style="{ position: 'absolute', zIndex: '99' }" >
         <a-avatar
           src="https://weneedfun.com/wp-content/uploads/2016/01/Pink-Flower-17.jpg"
@@ -489,6 +579,7 @@
           margin: 'auto'
         }"
       >
+      <!-- Element -->
       <span
         v-for="element in elements"
         :key="element.id"
@@ -519,10 +610,18 @@
           :style="{
             position: 'absolute',
             maxWidth: '500px',
-            height: '200px'
+            maxHeight: '100vh',
+
+            borderRadius: element.background ? '0' : roundness(element.rounded),
+            width: `${element.background ? '500' : element.width}px`,
+            height: element.background ? '100vh' : 'inherit',
+            left: element.background ? '0px' : '',
+            marginTop: `${element.background ? '0' : element.marginY}vh`,
+            marginLeft: `${element.background ? '0' : element.marginX}px`,
           }"
         >
       </span>
+      <!-- End Element -->
 
       </div>
 
@@ -616,6 +715,12 @@ export default {
         imageName: '',
         imageUrl: '',
         loading: false,
+        background: false,
+        width: 200,
+        height: null,
+        marginX: 125,
+        marginY: 10,
+        rounded: 1,
       });
       this.mode = 2;
       this.currentlyEditing = length;
@@ -639,7 +744,7 @@ export default {
       return this.elements.findIndex((element) => element.id === id);
     },
 
-    handleChange(info) {
+    upload(info) {
       if (info.file.status === 'uploading') {
         this.elements[this.indexOf(this.currentlyEditing)].loading = true;
       } else if (info.file.status === 'done') {
@@ -649,6 +754,27 @@ export default {
         });
 
         this.elements[this.indexOf(this.currentlyEditing)].imageName = info.file.name;
+      }
+    },
+
+    makeBackground() {
+      const { background } = this.elements[this.indexOf(this.currentlyEditing)];
+      this.elements[this.indexOf(this.currentlyEditing)].background = !background;
+    },
+
+    roundness(border) {
+      switch (border) {
+        case 0:
+          return '0';
+
+        case 1:
+          return '10%';
+
+        case 2:
+          return '100%';
+
+        default:
+          return '0';
       }
     },
 
