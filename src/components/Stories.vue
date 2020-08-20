@@ -8,75 +8,78 @@
       overflow: 'hidden'
     }"
   >
-      <a-avatar
-        class="story"
-        :size="60"
-        src="https://weneedfun.com/wp-content/uploads/2016/01/Pink-Flower-17.jpg"
-        :style="{
-          marginLeft: '20px',
-        }"
-        @click="viewMyStory"
-      />
+    <a-avatar
+      class="story"
+      :size="60"
+      src="https://weneedfun.com/wp-content/uploads/2016/01/Pink-Flower-17.jpg"
+      :style="{
+        marginLeft: '20px',
+      }"
+      @click="viewMyStory"
+    />
 
-      <a-button
-        type="danger"
-        shape="circle"
-        size="small"
-        :style="{ position: 'absolute', top: '47px', left: '293px' }"
-        @click="addStory"
-      >
-        +
-      </a-button>
+    <a-button
+      type="danger"
+      shape="circle"
+      size="small"
+      :style="{ position: 'absolute', top: '47px', left: '293px' }"
+      @click="toggleCreateStoryMode"
+    >
+      +
+    </a-button>
 
-      <a-avatar
-        v-for="i in 7"
-        class="story"
-        :size="60"
-        icon="user"
-        :key="i"
-        @click="viewStory"
-      />
+    <a-avatar
+      v-for="i in 7"
+      class="story"
+      :size="60"
+      icon="user"
+      :key="i"
+      @click="viewStory"
+    />
 
-    <!-- VIEW STORY -->
+  <!-- VIEW STORY -->
+    <div
+      v-if="storyMode"
+      :style="{
+        position: 'absolute',
+        height: '100vh',
+        width: '100vw',
+        top: '0',
+        left: '0',
+        backgroundColor: '#00000085',
+        backdropFilter: 'blur(10px)',
+      }"
+      @click="exitStoryMode"
+    >
       <div
-        v-if="storyMode"
         :style="{
           position: 'absolute',
           height: '100vh',
-          width: '100vw',
+          width: '500px',
           top: '0',
           left: '0',
-          backgroundColor: '#00000085',
-          backdropFilter: 'blur(10px)',
+          right: '0',
+          marginLeft: 'auto',
+          marginRight: 'auto',
+          backgroundColor: 'blue',
         }"
-        @click="exitStoryMode"
       >
-        <div
-          :style="{
-            position: 'absolute',
-            height: '100vh',
-            width: '500px',
-            top: '0',
-            left: '0',
-            right: '0',
-            marginLeft: 'auto',
-            marginRight: 'auto',
-            backgroundColor: 'blue',
-          }"
-        >
-          <a-avatar
+        <a-avatar
 
-            src="https://weneedfun.com/wp-content/uploads/2016/01/Pink-Flower-17.jpg"
-            :style="{ border: 'white 1px solid', margin: '10px' }"
-          />
-          <span :style="{ color: 'white', fontWeight: 'bold' }">
-            username
-          </span>
-        </div>
+          src="https://weneedfun.com/wp-content/uploads/2016/01/Pink-Flower-17.jpg"
+          :style="{ border: 'white 1px solid', margin: '10px' }"
+        />
+        <span :style="{ color: 'white', fontWeight: 'bold' }">
+          username
+        </span>
       </div>
-      <!-- END VIEW STORY -->
+    </div>
+    <!-- END VIEW STORY -->
 
-    <StoryCreator v-if="createStoryMode"/>
+    <StoryCreator
+      v-if="createStoryMode"
+      @exit="toggleCreateStoryMode"
+    />
 
   </div>
 </template>
@@ -103,8 +106,8 @@ export default {
     };
   },
   methods: {
-    addStory() {
-      this.createStoryMode = true;
+    toggleCreateStoryMode() {
+      this.createStoryMode = !this.createStoryMode;
     },
     viewMyStory() {
       this.storyMode = true;

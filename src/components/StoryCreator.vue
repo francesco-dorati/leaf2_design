@@ -18,6 +18,7 @@
         position: 'absolute',
         left: 0,
         width: '400px',
+        height: '95vh',
         marginLeft: '40px',
         marginTop: '20px',
       }"
@@ -125,6 +126,7 @@
         position: 'absolute',
         right: 0,
         width: '400px',
+        height: '95vh',
         marginLeft: '40px',
         marginTop: '20px',
       }"
@@ -149,8 +151,9 @@
             border: '2px white solid',
             marginRight: '15px',
             marginTop: '15px',
+            cursor: 'pointer',
           }"
-          @click="selectedBackgroundColor = backgroundColors.indexOf(color)"
+          @click="changeBackground(color)"
         >
           <a-icon
             v-if="backgroundColors[selectedBackgroundColor] === color"
@@ -159,7 +162,7 @@
             :style="{
               fontSize: '20px',
               marginTop: '6px',
-              color: color === 'white' ? 'black' : 'white'
+              color: color === 'white' ? 'black' : 'white',
             }"
           />
         </a-avatar>
@@ -180,8 +183,9 @@
             border: '2px white solid',
             marginRight: '15px',
             marginTop: '15px',
+            cursor: 'pointer',
           }"
-          @click="selectedBackgroundColor = backgroundColors.indexOf(color)"
+          @click="changeBackground(color)"
         >
           <a-icon
             v-if="backgroundColors[selectedBackgroundColor] === color"
@@ -194,6 +198,45 @@
             }"
           />
         </a-avatar>
+      </div>
+
+      <!-- Finish Buttons -->
+      <div
+        :style="{
+          position: 'absolute',
+          bottom: '10px',
+          left: '0'
+        }"
+      >
+        <a-button
+          type="danger"
+          :style="{ marginRight: '15px' }"
+          @click="exit"
+        >
+          <a-icon type="close-circle" />
+          Cancel
+        </a-button>
+
+        <a-button
+          :type="saveButtonType"
+          :style="{ marginRight: '15px' }"
+          @click="save"
+          @mouseenter="retrySaveButton(true)"
+          @mouseleave="retrySaveButton(false)"
+        >
+          <a-icon :type="saveButtonIcon" />
+          {{ saveButtonText }}
+        </a-button>
+
+        <a-button
+          :type="postButtonType"
+          @click="post"
+          @mouseenter="retryPostButton(true)"
+          @mouseleave="retryPostButton(false)"
+        >
+          <a-icon :type="postButtonIcon" />
+          {{ postButtonText }}
+        </a-button>
       </div>
 
     </div>
@@ -440,7 +483,7 @@
         accept="image/*"
         class="avatar-uploader"
         :show-upload-list="false"
-        action="http://localhost:8081/api/posts/image"
+        action="http://localhost:8081/api/story/image"
         :style="{ marginTop: '30px' }"
         @change="upload"
       >
@@ -729,6 +772,8 @@
 </template>
 
 <script>
+import http from '@/axios.config.js';
+
 const getBase64 = (img, callback) => {
   const reader = new FileReader();
   reader.addEventListener('load', () => callback(reader.result));
@@ -778,6 +823,12 @@ export default {
         'linear-gradient(223.88deg, #FF149D 8.89%, #620F32 94.31%)',
       ],
       selectedBackgroundColor: 0,
+      saveButtonText: 'Save',
+      saveButtonIcon: 'save',
+      saveButtonType: 'default',
+      postButtonText: 'Post',
+      postButtonIcon: 'upload',
+      postButtonType: 'primary',
     };
   },
 
@@ -799,6 +850,7 @@ export default {
       });
       this.mode = 1;
       this.currentlyEditing = length;
+      this.resetSaveButton();
     },
 
     createElementImage() {
@@ -819,15 +871,23 @@ export default {
       });
       this.mode = 2;
       this.currentlyEditing = length;
+      this.resetSaveButton();
     },
 
     editElement(id) {
       this.mode = this.elements[this.indexOf(id)].type;
       this.currentlyEditing = id;
+      this.resetSaveButton();
     },
 
     deleteElement(id) {
       this.elements = this.elements.filter((element) => element.id !== id);
+      this.resetSaveButton();
+    },
+
+    changeBackground(color) {
+      this.selectedBackgroundColor = this.backgroundColors.indexOf(color);
+      this.resetSaveButton();
     },
 
     goBack() {
@@ -873,6 +933,87 @@ export default {
       }
     },
 
+    exit() {
+      this.$confirm({
+        title: 'Are you sure you want to exit?',
+        okText: 'Exit',
+        okType: 'danger',
+        cancelText: 'Cancel',
+        onOk: () => {
+          this.$emit('exit');
+        },
+      });
+    },
+
+    async save() {
+      try {
+        this.saveButtonType = 'default';
+        this.saveButtonIcon = 'loading';
+        this.saveButtonText = 'Saving...';
+
+        await http.post('/story/save', {
+          background: this.selectedBackgroundColor,
+          elements: this.elements,
+        });
+
+        this.$message.success('Your story has been successfully saved.', 5);
+        this.saveButtonType = 'primary';
+        this.saveButtonIcon = 'check';
+        this.saveButtonText = 'Saved';
+      } catch (err) {
+        this.$message.error('An error has occurred while saving your story.', 5);
+        this.saveButtonType = 'danger';
+        this.saveButtonIcon = 'close';
+        this.saveButtonText = 'Error';
+      }
+    },
+
+    resetSaveButton() {
+      this.saveButtonType = 'dafault';
+      this.saveButtonIcon = 'save';
+      this.saveButtonText = 'Save';
+    },
+
+    retrySaveButton(entered) {
+      if (this.saveButtonText === 'Error' && entered) {
+        this.saveButtonText = 'Retry';
+        this.saveButtonIcon = 'redo';
+      } else if (this.saveButtonText === 'Retry' && !entered) {
+        this.saveButtonText = 'Error';
+        this.saveButtonIcon = 'close';
+      }
+    },
+
+    async post() {
+      try {
+        this.postButtonType = 'primary';
+        this.postButtonIcon = 'loading';
+        this.postButtonText = 'Posting...';
+
+        await http.post('/story/', {
+          background: this.selectedBackgroundColor,
+          elements: this.elements,
+        });
+
+        this.$emit('exit');
+        this.$message.success('Your story has been successfully posted.', 5);
+      } catch (err) {
+        this.$message.error('An error has occurred while posting your story.', 5);
+        this.postButtonType = 'danger';
+        this.postButtonIcon = 'close';
+        this.postButtonText = 'Error';
+      }
+    },
+
+    retryPostButton(entered) {
+      if (this.postButtonText === 'Error' && entered) {
+        this.postButtonText = 'Retry';
+        this.postButtonIcon = 'redo';
+      } else if (this.postButtonText === 'Retry' && !entered) {
+        this.postButtonText = 'Error';
+        this.postButtonIcon = 'close';
+      }
+    },
   },
 };
 </script>
