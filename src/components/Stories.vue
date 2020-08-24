@@ -8,119 +8,146 @@
       overflow: 'hidden'
     }"
   >
+    <!-- User Story -->
     <a-avatar
       class="story"
       :size="60"
       src="https://weneedfun.com/wp-content/uploads/2016/01/Pink-Flower-17.jpg"
       :style="{
+        boxSizing: 'border-box',
+        margin: '10px',
         marginLeft: '20px',
+        cursor: 'pointer',
+        border: userStories.length ? '2px white solid' : '',
+        boxShadow: userStories.length ? '0 0 0 2.5px #20bf6b' : '',
       }"
       @click="viewMyStory"
     />
 
+    <!-- Create Story Button -->
     <a-button
       type="danger"
       shape="circle"
       size="small"
       :style="{ position: 'absolute', top: '47px', left: '293px' }"
-      @click="toggleCreateStoryMode"
+      @click="createStory"
     >
       +
     </a-button>
 
+    <!-- Unviewed Story -->
     <a-avatar
-      v-for="i in 7"
-      class="story"
+      v-for="story in unviewedStories"
       :size="60"
       icon="user"
-      :key="i"
+      :key="story.id"
+      :style="{
+        boxSizing: 'border-box',
+        margin: '10px',
+        cursor: 'pointer',
+        border: '2px white solid',
+        boxShadow: '0 0 0 2.5px #20bf6b',
+      }"
       @click="viewStory"
     />
 
-  <!-- VIEW STORY -->
-    <div
-      v-if="storyMode"
+    <!-- Viewed Story -->
+    <a-avatar
+      v-for="story in viewedStories"
+      :size="60"
+      icon="user"
+      :key="story.id"
       :style="{
-        position: 'absolute',
-        height: '100vh',
-        width: '100vw',
-        top: '0',
-        left: '0',
-        backgroundColor: '#00000085',
-        backdropFilter: 'blur(10px)',
+        boxSizing: 'border-box',
+        margin: '10px',
+        cursor: 'pointer',
+        border: '2px white solid',
+        boxShadow: '0 0 0 2.5px #d1d8e0',
       }"
-      @click="exitStoryMode"
-    >
-      <div
-        :style="{
-          position: 'absolute',
-          height: '100vh',
-          width: '500px',
-          top: '0',
-          left: '0',
-          right: '0',
-          marginLeft: 'auto',
-          marginRight: 'auto',
-          backgroundColor: 'blue',
-        }"
-      >
-        <a-avatar
+      @click="viewStory"
+    />
 
-          src="https://weneedfun.com/wp-content/uploads/2016/01/Pink-Flower-17.jpg"
-          :style="{ border: 'white 1px solid', margin: '10px' }"
-        />
-        <span :style="{ color: 'white', fontWeight: 'bold' }">
-          username
-        </span>
-      </div>
-    </div>
+    <!-- prendere solo dati riferenti alle storie -->
+    <!-- poi prima della story mode prendere la storia effettiva -->
+    <!-- fare animazioni caricamento storia -->
+
+    <!-- VIEW STORY -->
+    <!-- <StoryViewer
+      v-if="mode === 1"
+      @exit="exit"
+    > -->
     <!-- END VIEW STORY -->
 
     <StoryCreator
-      v-if="createStoryMode"
-      @exit="toggleCreateStoryMode"
+      v-if="mode === 2"
+      @exit="exit"
     />
 
   </div>
 </template>
 
-<style lang="css">
-.story {
-  box-sizing: border-box;
-  margin: 10px;
-  cursor: pointer;
-  border: 2px white solid;
-  box-shadow: 0 0 0 2.5px #20bf6b;
-}
-</style>
-
 <script>
+// import http from '@/axios.config.js';
+// import StoryViewer from '@/components/StoryViewer.vue';
 import StoryCreator from '@/components/StoryCreator.vue';
 
 export default {
   name: 'Stories',
+
+  components: {
+    // StoryViewer,
+    StoryCreator,
+  },
+
   data() {
     return {
-      storyMode: false,
-      createStoryMode: false,
+      mode: 0, // 0: normal, 1: story, 2: createStory;
+      userStories: [
+        {},
+      ],
+      unviewedStories: [
+        {},
+        {},
+        {},
+      ],
+      viewedStories: [
+        {},
+        {},
+      ],
     };
   },
+
   methods: {
-    toggleCreateStoryMode() {
-      this.createStoryMode = !this.createStoryMode;
+    createStory() {
+      this.mode = 2;
     },
+
     viewMyStory() {
-      this.storyMode = true;
+      this.mode = 1;
     },
+
     viewStory() {
-      this.storyMode = true;
+      this.mode = 1;
     },
-    exitStoryMode() {
-      this.storyMode = false;
+
+    exit() {
+      this.mode = 0;
+    },
+
+    async getStories() {
+      // const { data } = await http.get('/stories/');
+
+      // this.userStories = data.userStories;
+      // this.stories = data.stories;
     },
   },
-  components: {
-    StoryCreator,
+
+  computed: {
+    // add a computed to move viewed stories to the right data array
+  },
+
+  created() {
+    this.getStories();
   },
 };
 </script>

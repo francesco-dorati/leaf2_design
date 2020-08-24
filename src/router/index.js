@@ -13,27 +13,41 @@ const routes = [
   {
     path: '/',
     component: Main,
+    meta: {
+      title: 'Leaf',
+    },
     children: [
       {
         path: '',
         name: 'Home',
-        key: '0',
         component: Home,
+        meta: {
+          title: 'Leaf',
+        },
       },
       {
         path: 'discover',
         name: 'Discover',
         component: Discover,
+        meta: {
+          title: 'Discover - Leaf',
+        },
       },
       {
         path: 'notifications',
         name: 'Notifications',
         component: Notifications,
+        meta: {
+          title: 'Notifications - Leaf',
+        },
       },
       {
         path: 'profile',
         name: 'Profile',
         component: Profile,
+        meta: {
+          title: 'Profile - Leaf',
+        },
       },
       {
         path: 'user/:username',

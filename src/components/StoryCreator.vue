@@ -3,7 +3,7 @@
     class="storyCreator"
     :style="{
       position: 'absolute',
-      height: '100vh',
+      minHeight: '100vh',
       width: '100vw',
       top: '0',
       left: '0',
@@ -34,13 +34,13 @@
           />
           <a-menu slot="overlay">
             <a-menu-item>
-              <a @click="createElementText">
+              <a @click="createTextElement">
                 <a-icon type="font-size" :style="{ marginRight: '10px' }" />
                 Text
               </a>
             </a-menu-item>
             <a-menu-item>
-              <a @click="createElementImage">
+              <a @click="createImageElement">
                 <a-icon type="file-image" :style="{ marginRight: '10px' }" />
                 Image
               </a>
@@ -51,7 +51,7 @@
 
       <!-- If no Elements -->
       <div
-        v-if="!elements.length"
+        v-if="!Object.keys(elements).length"
         :style="{
           color: '#FFFFFF50',
           fontSize: '16px',
@@ -77,8 +77,8 @@
 
       <!-- Single Element -->
       <a-card
-        v-for="element in elements"
-        :key="element.id"
+        v-for="(element, id) in elements"
+        :key="id"
         :style="{ width: '350px', marginBottom: '30px' }"
       >
         <a-avatar
@@ -104,13 +104,13 @@
           {{ element.text || element.imageName || element.title }}
         </span>
         <a-tooltip title="Edit">
-          <a-icon type="edit" :style="{ marginLeft: '10px' }" @click="editElement(element.id)" />
+          <a-icon type="edit" :style="{ marginLeft: '10px' }" @click="editElement(id)" />
         </a-tooltip>
         <a-tooltip title="Delete">
           <a-icon
             type="delete"
             :style="{ marginLeft: '20px' }"
-            @click="deleteElement(element.id)"
+            @click="deleteElement(id)"
           />
         </a-tooltip>
       </a-card>
@@ -214,28 +214,28 @@
           @click="exit"
         >
           <a-icon type="close-circle" />
-          Cancel
+          Exit
         </a-button>
 
         <a-button
-          :type="saveButtonType"
+          :type="saveButton.type"
           :style="{ marginRight: '15px' }"
           @click="save"
           @mouseenter="retrySaveButton(true)"
           @mouseleave="retrySaveButton(false)"
         >
-          <a-icon :type="saveButtonIcon" />
-          {{ saveButtonText }}
+          <a-icon :type="saveButton.icon" />
+          {{ saveButton.text }}
         </a-button>
 
         <a-button
-          :type="postButtonType"
+          :type="postButton.type"
           @click="post"
           @mouseenter="retryPostButton(true)"
           @mouseleave="retryPostButton(false)"
         >
-          <a-icon :type="postButtonIcon" />
-          {{ postButtonText }}
+          <a-icon :type="postButton.icon" />
+          {{ postButton.text }}
         </a-button>
       </div>
 
@@ -274,7 +274,7 @@
           autofocus
           placeholder="text to include"
           :style="{ width: '286px', marginTop: '10px' }"
-          v-model="elements[indexOf(currentlyEditing)].text"
+          v-model="elements[currentlyEditingId].text"
         />
       </div>
 
@@ -293,7 +293,7 @@
         <div :style="{ marginTop: '10px' }">
           <!-- Typography -- Alignment -->
           <a-radio-group
-            v-model="elements[indexOf(currentlyEditing)].align"
+            v-model="elements[currentlyEditingId].align"
           >
             <a-radio-button  value="left">
               <a-icon type="align-left" />
@@ -308,31 +308,31 @@
           <!-- Typography -- Style -->
           <a-button-group :style="{ marginLeft: '13px' }">
             <a-button
-              :type="elements[indexOf(currentlyEditing)].bold ? 'primary' : 'default'"
+              :type="elements[currentlyEditingId].bold ? 'primary' : 'default'"
               @click="
-                elements[indexOf(currentlyEditing)].bold
+                elements[currentlyEditingId].bold
                 =
-                !elements[indexOf(currentlyEditing)].bold
+                !elements[currentlyEditingId].bold
               "
             >
               <a-icon type="bold" />
             </a-button>
             <a-button
-              :type="elements[indexOf(currentlyEditing)].italic ? 'primary' : 'default'"
+              :type="elements[currentlyEditingId].italic ? 'primary' : 'default'"
               @click="
-                elements[indexOf(currentlyEditing)].italic
+                elements[currentlyEditingId].italic
                 =
-                !elements[indexOf(currentlyEditing)].italic
+                !elements[currentlyEditingId].italic
               "
             >
               <a-icon type="italic" />
             </a-button>
             <a-button
-              :type="elements[indexOf(currentlyEditing)].underline ? 'primary' : 'default'"
+              :type="elements[currentlyEditingId].underline ? 'primary' : 'default'"
               @click="
-                elements[indexOf(currentlyEditing)].underline
+                elements[currentlyEditingId].underline
                 =
-                !elements[indexOf(currentlyEditing)].underline
+                !elements[currentlyEditingId].underline
               "
             >
               <a-icon type="underline" />
@@ -352,7 +352,7 @@
         <a-row :style="{ marginTop: '10px' }">
           <a-col :span="11">
             <a-slider
-              v-model="elements[indexOf(currentlyEditing)].margin"
+              v-model="elements[currentlyEditingId].margin"
               :min="0"
               :max="100"
               :style="{ marginLeft: '0px' }"
@@ -360,7 +360,7 @@
           </a-col>
           <a-col :span="1">
               <a-input-number
-                v-model="elements[indexOf(currentlyEditing)].margin"
+                v-model="elements[currentlyEditingId].margin"
                 :min="0"
                 :max="100"
                 :formatter="value => `${value}%`"
@@ -382,7 +382,7 @@
         <a-row :style="{ marginTop: '10px' }">
           <a-col :span="11">
             <a-slider
-              v-model="elements[indexOf(currentlyEditing)].size"
+              v-model="elements[currentlyEditingId].size"
               :min="1"
               :max="150"
               :style="{ marginLeft: '0px' }"
@@ -390,7 +390,7 @@
           </a-col>
           <a-col :span="1">
             <a-input-number
-              v-model="elements[indexOf(currentlyEditing)].size"
+              v-model="elements[currentlyEditingId].size"
               :min="1"
               :max="150"
               :formatter="value => `${value}px`"
@@ -437,10 +437,10 @@
             marginRight: '15px',
             marginTop: '15px',
           }"
-          @click="elements[indexOf(currentlyEditing)].color = colors.indexOf(color)"
+          @click="elements[currentlyEditingId].color = colors.indexOf(color)"
         >
           <a-icon
-            v-if="colors[elements[indexOf(currentlyEditing)].color] === color"
+            v-if="colors[elements[currentlyEditingId].color] === color"
             type="check-circle"
             theme="filled"
             :style="{
@@ -483,18 +483,18 @@
         accept="image/*"
         class="avatar-uploader"
         :show-upload-list="false"
-        action="http://localhost:8081/api/story/image"
+        action="http://localhost:8081/api/stories/image"
         :style="{ marginTop: '30px' }"
         @change="upload"
       >
         <img
-          v-if="elements[indexOf(currentlyEditing)].imageUrl"
-          :src="elements[indexOf(currentlyEditing)].imageUrl"
+          v-if="elements[currentlyEditingId].imageUrl"
+          :src="elements[currentlyEditingId].imageUrl"
           alt="avatar"
           :style="{ height: '110px', borderRadius: '4px' }"
         />
         <div v-else>
-          <a-icon :type="elements[indexOf(currentlyEditing)].loading ? 'loading' : 'plus'" />
+          <a-icon :type="elements[currentlyEditingId].loading ? 'loading' : 'plus'" />
           <div class="ant-upload-text">
             Upload
           </div>
@@ -514,11 +514,11 @@
         </span>
         <br>
         <a-radio-group
-          v-model="elements[indexOf(currentlyEditing)].rounded"
+          v-model="elements[currentlyEditingId].rounded"
           :disabled="
-            elements[indexOf(currentlyEditing)].background
+            elements[currentlyEditingId].background
             ||
-            !elements[indexOf(currentlyEditing)].imageUrl
+            !elements[currentlyEditingId].imageUrl
           "
           :style="{ marginTop: '10px' }"
         >
@@ -543,28 +543,28 @@
         <a-row>
           <a-col :span="11">
             <a-slider
-              v-model="elements[indexOf(currentlyEditing)].width"
+              v-model="elements[currentlyEditingId].width"
               :min="0"
               :max="450"
               :disabled="
-                elements[indexOf(currentlyEditing)].background
+                elements[currentlyEditingId].background
                 ||
-                !elements[indexOf(currentlyEditing)].imageUrl
+                !elements[currentlyEditingId].imageUrl
               "
               :style="{ marginLeft: '0px' }"
             />
           </a-col>
           <a-col :span="1">
             <a-input-number
-              v-model="elements[indexOf(currentlyEditing)].width"
+              v-model="elements[currentlyEditingId].width"
               :min="0"
               :max="450"
               :formatter="value => `${value}px`"
               :parser="value => value.replace('px', '')"
               :disabled="
-                elements[indexOf(currentlyEditing)].background
+                elements[currentlyEditingId].background
                 ||
-                !elements[indexOf(currentlyEditing)].imageUrl
+                !elements[currentlyEditingId].imageUrl
               "
               :style="{ marginLeft: '10px' }"
             />
@@ -594,35 +594,35 @@
       <!-- Image Position -- Margin X -->
       <div :style="{ marginTop: '30px' }">
         <span :style="{ color: 'white', fontSize: '18px', fontWeight: 600 }">
-          <a-icon type="arrows-alt" rotate="45" :style="{ marginRight: '10px' }" />
+          <a-icon type="arrows-alt" :rotate="45" :style="{ marginRight: '10px' }" />
           Margin X:
         </span>
         <br>
         <a-row>
           <a-col :span="11">
             <a-slider
-              v-model="elements[indexOf(currentlyEditing)].marginX"
+              v-model="elements[currentlyEditingId].marginX"
               :min="0"
-              :max="450 - elements[indexOf(currentlyEditing)].width"
+              :max="450 - elements[currentlyEditingId].width"
               :disabled="
-                elements[indexOf(currentlyEditing)].background
+                elements[currentlyEditingId].background
                 ||
-                !elements[indexOf(currentlyEditing)].imageUrl
+                !elements[currentlyEditingId].imageUrl
               "
               :style="{ marginLeft: '0px' }"
             />
           </a-col>
           <a-col :span="1">
             <a-input-number
-              v-model="elements[indexOf(currentlyEditing)].marginX"
+              v-model="elements[currentlyEditingId].marginX"
               :min="0"
-              :max="450 - elements[indexOf(currentlyEditing)].width"
+              :max="450 - elements[currentlyEditingId].width"
               :formatter="value => `${value}px`"
               :parser="value => value.replace('px', '')"
               :disabled="
-                elements[indexOf(currentlyEditing)].background
+                elements[currentlyEditingId].background
                 ||
-                !elements[indexOf(currentlyEditing)].imageUrl
+                !elements[currentlyEditingId].imageUrl
               "
               :style="{ marginLeft: '10px' }"
             />
@@ -633,35 +633,35 @@
       <!-- Image Position -- Margin Y -->
       <div :style="{ marginTop: '30px' }">
         <span :style="{ color: 'white', fontSize: '18px', fontWeight: 600 }">
-          <a-icon type="arrows-alt" rotate="-45" :style="{ marginRight: '10px' }" />
+          <a-icon type="arrows-alt" :rotate="-45" :style="{ marginRight: '10px' }" />
           Margin Y:
         </span>
         <br>
         <a-row>
           <a-col :span="11">
             <a-slider
-              v-model="elements[indexOf(currentlyEditing)].marginY"
+              v-model="elements[currentlyEditingId].marginY"
               :min="0"
               :max="100"
               :disabled="
-                elements[indexOf(currentlyEditing)].background
+                elements[currentlyEditingId].background
                 ||
-                !elements[indexOf(currentlyEditing)].imageUrl
+                !elements[currentlyEditingId].imageUrl
               "
               :style="{ marginLeft: '0px' }"
             />
           </a-col>
           <a-col :span="1">
             <a-input-number
-              v-model="elements[indexOf(currentlyEditing)].marginY"
+              v-model="elements[currentlyEditingId].marginY"
               :min="0"
               :max="100"
               :formatter="value => `${value}%`"
               :parser="value => value.replace('%', '')"
               :disabled="
-                elements[indexOf(currentlyEditing)].background
+                elements[currentlyEditingId].background
                 ||
-                !elements[indexOf(currentlyEditing)].imageUrl
+                !elements[currentlyEditingId].imageUrl
               "
               :style="{ marginLeft: '10px' }"
             />
@@ -671,8 +671,8 @@
 
       <!-- Image Position -- Background -->
       <a-button
-        :type="elements[indexOf(currentlyEditing)].background ? 'primary' : 'default'"
-        :disabled="!elements[indexOf(currentlyEditing)].imageUrl"
+        :type="elements[currentlyEditingId].background ? 'primary' : 'default'"
+        :disabled="!elements[currentlyEditingId].imageUrl"
         :style="{ width: '284px', marginTop: '30px' }"
         @click="makeBackground"
         block
@@ -718,8 +718,8 @@
       >
       <!-- Single Element -->
       <span
-        v-for="element in elements"
-        :key="element.id"
+        v-for="(element, id) in elements"
+        :key="id"
       >
         <!-- Text Element -->
         <span
@@ -774,20 +774,15 @@
 <script>
 import http from '@/axios.config.js';
 
-const getBase64 = (img, callback) => {
-  const reader = new FileReader();
-  reader.addEventListener('load', () => callback(reader.result));
-  reader.readAsDataURL(img);
-};
-
 export default {
   name: 'StoryCreator',
 
   data() {
     return {
-      mode: 0,
-      currentlyEditing: 0,
-      elements: [],
+      mode: 0, // 0: elements, 1: text, 2: image;
+      elementIdCounter: 0,
+      currentlyEditingId: 0,
+      elements: {},
       colors: [
         'white',
         'black',
@@ -823,22 +818,25 @@ export default {
         'linear-gradient(223.88deg, #FF149D 8.89%, #620F32 94.31%)',
       ],
       selectedBackgroundColor: 0,
-      saveButtonText: 'Save',
-      saveButtonIcon: 'save',
-      saveButtonType: 'default',
-      postButtonText: 'Post',
-      postButtonIcon: 'upload',
-      postButtonType: 'primary',
+      savedId: null,
+      saveButton: {
+        text: 'Save',
+        icon: 'save',
+        type: 'default',
+      },
+      postButton: {
+        text: 'Post',
+        icon: 'upload',
+        type: 'primary',
+      },
     };
   },
 
   methods: {
-    createElementText() {
-      const { length } = this.elements;
-      this.elements.push({
-        id: length,
+    createTextElement() {
+      this.elements[this.elementIdCounter] = {
         type: 1,
-        title: `Element ${length + 1}`,
+        title: `Element ${this.elementIdCounter + 1}`,
         text: '',
         align: 'center',
         bold: true,
@@ -847,18 +845,18 @@ export default {
         margin: 20,
         size: 50,
         color: 1,
-      });
+      };
       this.mode = 1;
-      this.currentlyEditing = length;
+      this.currentlyEditingId = this.elementIdCounter;
+      this.elementIdCounter += 1;
       this.resetSaveButton();
+      console.log(this.elements[0]);
     },
 
-    createElementImage() {
-      const { length } = this.elements;
-      this.elements.push({
-        id: length,
+    createImageElement() {
+      this.elements[this.elementIdCounter] = {
         type: 2,
-        title: `Element ${length + 1}`,
+        title: `Element ${this.elementIdCounter + 1}`,
         imageName: '',
         imageUrl: '',
         loading: false,
@@ -868,20 +866,25 @@ export default {
         marginX: 125,
         marginY: 10,
         rounded: 1,
-      });
+      };
       this.mode = 2;
-      this.currentlyEditing = length;
+      this.currentlyEditingId = this.elementIdCounter;
+      this.elementIdCounter += 1;
       this.resetSaveButton();
     },
 
     editElement(id) {
-      this.mode = this.elements[this.indexOf(id)].type;
-      this.currentlyEditing = id;
+      this.mode = this.elements[id].type;
+      this.currentlyEditingId = id;
       this.resetSaveButton();
     },
 
     deleteElement(id) {
-      this.elements = this.elements.filter((element) => element.id !== id);
+      if (this.elements[id].imageId) {
+        this.deleteImage(this.elements[id].imageId);
+      }
+      delete this.elements[id];
+      this.$forceUpdate();
       this.resetSaveButton();
     },
 
@@ -890,31 +893,28 @@ export default {
       this.resetSaveButton();
     },
 
-    goBack() {
+    async goBack() {
       this.mode = 0;
-      this.currentlyEditing = null;
-    },
-
-    indexOf(id) {
-      return this.elements.findIndex((element) => element.id === id);
+      this.currentlyEditingId = null;
     },
 
     upload(info) {
       if (info.file.status === 'uploading') {
-        this.elements[this.indexOf(this.currentlyEditing)].loading = true;
+        this.elements[this.currentlyEditingId].loading = true;
       } else if (info.file.status === 'done') {
-        getBase64(info.file.originFileObj, (imageUrl) => {
-          this.elements[this.indexOf(this.currentlyEditing)].imageUrl = imageUrl;
-          this.elements[this.indexOf(this.currentlyEditing)].loading = false;
-        });
-
-        this.elements[this.indexOf(this.currentlyEditing)].imageName = info.file.name;
+        const { response } = info.file;
+        this.elements[this.currentlyEditingId].imageId = response.id;
+        this.elements[this.currentlyEditingId].imageUrl = response.url;
+        this.elements[this.currentlyEditingId].imageName = response.name;
       }
     },
 
+    async deleteImage(id) {
+      await http.delete(`/stories/image/${id}`);
+    },
+
     makeBackground() {
-      const { background } = this.elements[this.indexOf(this.currentlyEditing)];
-      this.elements[this.indexOf(this.currentlyEditing)].background = !background;
+      this.elements[this.currentlyEditingId].background = !this.elements[this.currentlyEditingId];
     },
 
     roundness(border) {
@@ -940,6 +940,13 @@ export default {
         okType: 'danger',
         cancelText: 'Cancel',
         onOk: () => {
+          if (!this.savedId) {
+            this.elements.forEach((el) => {
+              if (el.type === 2) {
+                this.deleteImage(el.imageId);
+              }
+            });
+          }
           this.$emit('exit');
         },
       });
@@ -947,50 +954,59 @@ export default {
 
     async save() {
       try {
-        this.saveButtonType = 'default';
-        this.saveButtonIcon = 'loading';
-        this.saveButtonText = 'Saving...';
+        this.saveButton.type = 'default';
+        this.saveButton.icon = 'loading';
+        this.saveButton.text = 'Saving...';
 
-        await http.post('/story/save', {
+        const response = await http.post('/stories/save', {
           background: this.selectedBackgroundColor,
           elements: this.elements,
         });
 
         this.$message.success('Your story has been successfully saved.', 5);
-        this.saveButtonType = 'primary';
-        this.saveButtonIcon = 'check';
-        this.saveButtonText = 'Saved';
+        this.savedId = response.data.id;
+        this.saveButton.type = 'primary';
+        this.saveButton.icon = 'check';
+        this.saveButton.text = 'Saved';
       } catch (err) {
         this.$message.error('An error has occurred while saving your story.', 5);
-        this.saveButtonType = 'danger';
-        this.saveButtonIcon = 'close';
-        this.saveButtonText = 'Error';
+        this.saveButton.type = 'danger';
+        this.saveButton.icon = 'close';
+        this.saveButton.text = 'Error';
       }
     },
 
+    async deleteSave(id) {
+      await http.delete(`/stories/save/${id}`);
+    },
+
     resetSaveButton() {
-      this.saveButtonType = 'dafault';
-      this.saveButtonIcon = 'save';
-      this.saveButtonText = 'Save';
+      if (this.savedId) {
+        this.deleteSave(this.savedId);
+      }
+      this.savedId = null;
+      this.saveButton.type = 'dafault';
+      this.saveButton.icon = 'save';
+      this.saveButton.text = 'Save';
     },
 
     retrySaveButton(entered) {
-      if (this.saveButtonText === 'Error' && entered) {
-        this.saveButtonText = 'Retry';
-        this.saveButtonIcon = 'redo';
-      } else if (this.saveButtonText === 'Retry' && !entered) {
-        this.saveButtonText = 'Error';
-        this.saveButtonIcon = 'close';
+      if (this.saveButton.text === 'Error' && entered) {
+        this.saveButton.text = 'Retry';
+        this.saveButton.icon = 'redo';
+      } else if (this.saveButton.text === 'Retry' && !entered) {
+        this.saveButton.text = 'Error';
+        this.saveButton.icon = 'close';
       }
     },
 
     async post() {
       try {
-        this.postButtonType = 'primary';
-        this.postButtonIcon = 'loading';
-        this.postButtonText = 'Posting...';
+        this.postButton.type = 'primary';
+        this.postButton.icon = 'loading';
+        this.postButton.text = 'Posting...';
 
-        await http.post('/story/', {
+        await http.post('/stories/', {
           background: this.selectedBackgroundColor,
           elements: this.elements,
         });
@@ -999,22 +1015,23 @@ export default {
         this.$message.success('Your story has been successfully posted.', 5);
       } catch (err) {
         this.$message.error('An error has occurred while posting your story.', 5);
-        this.postButtonType = 'danger';
-        this.postButtonIcon = 'close';
-        this.postButtonText = 'Error';
+        this.postButton.type = 'danger';
+        this.postButton.icon = 'close';
+        this.postButton.text = 'Error';
       }
     },
 
     retryPostButton(entered) {
-      if (this.postButtonText === 'Error' && entered) {
-        this.postButtonText = 'Retry';
-        this.postButtonIcon = 'redo';
-      } else if (this.postButtonText === 'Retry' && !entered) {
-        this.postButtonText = 'Error';
-        this.postButtonIcon = 'close';
+      if (this.postButton.text === 'Error' && entered) {
+        this.postButton.text = 'Retry';
+        this.postButton.icon = 'redo';
+      } else if (this.postButton.text === 'Retry' && !entered) {
+        this.postButton.text = 'Error';
+        this.postButton.icon = 'close';
       }
     },
   },
+
 };
 </script>
 
