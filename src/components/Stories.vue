@@ -9,20 +9,36 @@
     }"
   >
     <!-- User Story -->
-    <a-avatar
-      class="story"
-      :size="60"
-      src="https://weneedfun.com/wp-content/uploads/2016/01/Pink-Flower-17.jpg"
+    <a-skeleton
+      :loading="loading"
+      :avatar="{ size: 60 }"
+      :title="false"
+      :paragraph="false"
+      active
       :style="{
-        boxSizing: 'border-box',
+        display: 'inline-block',
         margin: '10px',
         marginLeft: '20px',
-        cursor: 'pointer',
-        border: userStories.length ? '2px white solid' : '',
-        boxShadow: userStories.length ? '0 0 0 2.5px #20bf6b' : '',
+        width: '60px',
       }"
-      @click="viewMyStory"
-    />
+    >
+      <a-avatar
+        class="story"
+        :size="60"
+        :src="userStories.avatar.url"
+        :icon="userStories.avatar.url ? '' : 'user'"
+        :style="{
+          boxSizing: 'border-box',
+          margin: '10px',
+          marginLeft: '20px',
+          cursor: 'pointer',
+          backgroundColor: userStories.avatar.color,
+          border: userStories.stories ? '2px white solid' : '',
+          boxShadow: userStories.stories ? '0 0 0 2.5px #20bf6b' : '',
+        }"
+        @click="viewMyStory"
+      />
+    </a-skeleton>
 
     <!-- Create Story Button -->
     <a-button
@@ -37,46 +53,61 @@
 
     <!-- Unviewed Story -->
     <a-avatar
-      v-for="story in unviewedStories"
+      v-for="(user, userId) in unviewedStories"
       :size="60"
-      icon="user"
-      :key="story.id"
+      :src="user.avatar.url"
+      :icon="user.avatar.url ? '' : 'user'"
+      :key="userId"
       :style="{
         boxSizing: 'border-box',
         margin: '10px',
         cursor: 'pointer',
         border: '2px white solid',
         boxShadow: '0 0 0 2.5px #20bf6b',
+        backgroundColor: user.avatar.color,
       }"
       @click="viewStory"
     />
 
     <!-- Viewed Story -->
     <a-avatar
-      v-for="story in viewedStories"
+      v-for="(user, userId) in viewedStories"
       :size="60"
-      icon="user"
-      :key="story.id"
+      :src="user.avatar.url"
+      :icon="user.avatar.url ? '' : 'user'"
+      :key="userId"
       :style="{
         boxSizing: 'border-box',
         margin: '10px',
         cursor: 'pointer',
         border: '2px white solid',
         boxShadow: '0 0 0 2.5px #d1d8e0',
+        backgroundColor: user.avatar.color,
       }"
       @click="viewStory"
     />
 
-    <!-- prendere solo dati riferenti alle storie -->
-    <!-- poi prima della story mode prendere la storia effettiva -->
-    <!-- fare animazioni caricamento storia -->
+    <!-- Skeleton -->
+    <a-skeleton
+      v-for="i in 5"
+      :key="`skeleton-${i}`"
+      :loading="loading"
+      :avatar="{ size: 60 }"
+      :title="false"
+      :paragraph="false"
+      active
+      :style="{
+        display: 'inline-block',
+        margin: loading ? '10px' : '',
+        width: '60px',
+      }"
+    />
 
-    <!-- VIEW STORY -->
-    <!-- <StoryViewer
+    <StoryViewer
       v-if="mode === 1"
+      :stories="[]"
       @exit="exit"
-    > -->
-    <!-- END VIEW STORY -->
+    />
 
     <StoryCreator
       v-if="mode === 2"
@@ -87,33 +118,29 @@
 </template>
 
 <script>
-// import http from '@/axios.config.js';
-// import StoryViewer from '@/components/StoryViewer.vue';
+import http from '@/axios.config.js';
+import StoryViewer from '@/components/StoryViewer.vue';
 import StoryCreator from '@/components/StoryCreator.vue';
 
 export default {
   name: 'Stories',
 
   components: {
-    // StoryViewer,
+    StoryViewer,
     StoryCreator,
   },
 
   data() {
     return {
       mode: 0, // 0: normal, 1: story, 2: createStory;
-      userStories: [
-        {},
-      ],
-      unviewedStories: [
-        {},
-        {},
-        {},
-      ],
-      viewedStories: [
-        {},
-        {},
-      ],
+      userStories: {
+        avatar: {
+          color: '',
+        },
+      },
+      unviewedStories: {},
+      viewedStories: {},
+      loading: true,
     };
   },
 
@@ -135,10 +162,14 @@ export default {
     },
 
     async getStories() {
-      // const { data } = await http.get('/stories/');
+      this.loading = true;
 
-      // this.userStories = data.userStories;
-      // this.stories = data.stories;
+      const { data } = await http.get('/stories/');
+
+      this.loading = false;
+      this.userStories = data.userStories;
+      this.unviewedStories = data.unviewedStories;
+      this.viewedStories = data.viewedStories;
     },
   },
 
@@ -150,4 +181,25 @@ export default {
     this.getStories();
   },
 };
+// username: 'username',
+//         avatar: 'https://weneedfun.com/wp-content/uploads/2016/01/Pink-Flower-17.jpg',
+//         stories: {
+//           0: {
+//             time: 'today',
+//             background: 0,
+//             elements: {
+//               0: {
+//                 type: 1,
+//                 text: 'hello',
+//                 align: 'left',
+//                 bold: true,
+//                 italic: false,
+//                 underline: false,
+//                 margin: 40,
+//                 size: 40,
+//                 color: 1,
+//               },
+//             },
+//           },
+//         },
 </script>
