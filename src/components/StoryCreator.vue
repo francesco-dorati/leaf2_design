@@ -274,7 +274,7 @@
           autoFocus
           placeholder="text to include"
           :style="{ width: '286px', marginTop: '10px' }"
-          v-model="elements.find((e) => e.id === currentlyEditingId).text"
+          v-model="currentlyEditing.text"
         />
       </div>
 
@@ -293,7 +293,7 @@
         <div :style="{ marginTop: '10px' }">
           <!-- Typography -- Alignment -->
           <a-radio-group
-            v-model="elements.find((e) => e.id === currentlyEditingId).align"
+            v-model="currentlyEditing.align"
           >
             <a-radio-button  value="left">
               <a-icon type="align-left" />
@@ -308,37 +308,31 @@
           <!-- Typography -- Style -->
           <a-button-group :style="{ marginLeft: '13px' }">
             <a-button
-              :type="elements.find((e) => e.id === currentlyEditingId).bold ? 'primary' : 'default'"
+              :type="currentlyEditing.bold ? 'primary' : 'default'"
               @click="
-                elements.find((e) => e.id === currentlyEditingId).bold
+                currentlyEditing.bold
                 =
-                !elements.find((e) => e.id === currentlyEditingId).bold
+                !currentlyEditing.bold
               "
             >
               <a-icon type="bold" />
             </a-button>
             <a-button
-              :type="
-                elements.find((e) => e.id === currentlyEditingId).italic ?
-                'primary' : 'default'
-              "
+              :type="currentlyEditing.italic ?'primary' : 'default'"
               @click="
-                elements.find((e) => e.id === currentlyEditingId).italic
+                currentlyEditing.italic
                 =
-                !elements.find((e) => e.id === currentlyEditingId).italic
+                !currentlyEditing.italic
               "
             >
               <a-icon type="italic" />
             </a-button>
             <a-button
-              :type="
-                elements.find((e) => e.id === currentlyEditingId).underline ?
-                'primary' : 'default'
-              "
+              :type="currentlyEditing.underline ?'primary' : 'default'"
               @click="
-                elements.find((e) => e.id === currentlyEditingId).underline
+                currentlyEditing.underline
                 =
-                !elements.find((e) => e.id === currentlyEditingId).underline
+                !currentlyEditing.underline
               "
             >
               <a-icon type="underline" />
@@ -358,7 +352,7 @@
         <a-row :style="{ marginTop: '10px' }">
           <a-col :span="11">
             <a-slider
-              v-model="elements.find((e) => e.id === currentlyEditingId).margin"
+              v-model="currentlyEditing.margin"
               :min="0"
               :max="100"
               :style="{ marginLeft: '0px' }"
@@ -366,7 +360,7 @@
           </a-col>
           <a-col :span="1">
               <a-input-number
-                v-model="elements.find((e) => e.id === currentlyEditingId).margin"
+                v-model="currentlyEditing.margin"
                 :min="0"
                 :max="100"
                 :formatter="value => `${value}%`"
@@ -388,7 +382,7 @@
         <a-row :style="{ marginTop: '10px' }">
           <a-col :span="11">
             <a-slider
-              v-model="elements.find((e) => e.id === currentlyEditingId).size"
+              v-model="currentlyEditing.size"
               :min="1"
               :max="150"
               :style="{ marginLeft: '0px' }"
@@ -396,7 +390,7 @@
           </a-col>
           <a-col :span="1">
             <a-input-number
-              v-model="elements.find((e) => e.id === currentlyEditingId).size"
+              v-model="currentlyEditing.size"
               :min="1"
               :max="150"
               :formatter="value => `${value}px`"
@@ -443,10 +437,10 @@
             marginRight: '15px',
             marginTop: '15px',
           }"
-          @click="elements.find((e) => e.id === currentlyEditingId).color = colors.indexOf(color)"
+          @click="currentlyEditing.color = colors.indexOf(color)"
         >
           <a-icon
-            v-if="colors[elements.find((e) => e.id === currentlyEditingId).color] === color"
+            v-if="colors[currentlyEditing.color] === color"
             type="check-circle"
             theme="filled"
             :style="{
@@ -494,14 +488,14 @@
         @change="upload"
       >
         <img
-          v-if="elements.find((e) => e.id === currentlyEditingId).imageUrl"
-          :src="elements.find((e) => e.id === currentlyEditingId).imageUrl"
+          v-if="currentlyEditing.imageUrl"
+          :src="currentlyEditing.imageUrl"
           alt="avatar"
           :style="{ height: '110px', borderRadius: '4px' }"
         />
         <div v-else>
           <a-icon
-            :type="elements.find((e) => e.id === currentlyEditingId).loading ? 'loading' : 'plus'"
+            :type="currentlyEditing.loading ? 'loading' : 'plus'"
           />
           <div class="ant-upload-text">
             Upload
@@ -522,11 +516,11 @@
         </span>
         <br>
         <a-radio-group
-          v-model="elements.find((e) => e.id === currentlyEditingId).rounded"
+          v-model="currentlyEditing.rounded"
           :disabled="
-            elements.find((e) => e.id === currentlyEditingId).background
+            currentlyEditing.background
             ||
-            !elements.find((e) => e.id === currentlyEditingId).imageUrl
+            !currentlyEditing.imageUrl
           "
           :style="{ marginTop: '10px' }"
         >
@@ -551,28 +545,28 @@
         <a-row>
           <a-col :span="11">
             <a-slider
-              v-model="elements.find((e) => e.id === currentlyEditingId).width"
+              v-model="currentlyEditing.width"
               :min="0"
               :max="450"
               :disabled="
-                elements.find((e) => e.id === currentlyEditingId).background
+                currentlyEditing.background
                 ||
-                !elements.find((e) => e.id === currentlyEditingId).imageUrl
+                !currentlyEditing.imageUrl
               "
               :style="{ marginLeft: '0px' }"
             />
           </a-col>
           <a-col :span="1">
             <a-input-number
-              v-model="elements.find((e) => e.id === currentlyEditingId).width"
+              v-model="currentlyEditing.width"
               :min="0"
               :max="450"
               :formatter="value => `${value}px`"
               :parser="value => value.replace('px', '')"
               :disabled="
-                elements.find((e) => e.id === currentlyEditingId).background
+                currentlyEditing.background
                 ||
-                !elements.find((e) => e.id === currentlyEditingId).imageUrl
+                !currentlyEditing.imageUrl
               "
               :style="{ marginLeft: '10px' }"
             />
@@ -609,28 +603,28 @@
         <a-row>
           <a-col :span="11">
             <a-slider
-              v-model="elements.find((e) => e.id === currentlyEditingId).marginX"
+              v-model="currentlyEditing.marginX"
               :min="0"
-              :max="450 - elements.find((e) => e.id === currentlyEditingId).width"
+              :max="450 - currentlyEditing.width"
               :disabled="
-                elements.find((e) => e.id === currentlyEditingId).background
+                currentlyEditing.background
                 ||
-                !elements.find((e) => e.id === currentlyEditingId).imageUrl
+                !currentlyEditing.imageUrl
               "
               :style="{ marginLeft: '0px' }"
             />
           </a-col>
           <a-col :span="1">
             <a-input-number
-              v-model="elements.find((e) => e.id === currentlyEditingId).marginX"
+              v-model="currentlyEditing.marginX"
               :min="0"
-              :max="450 - elements.find((e) => e.id === currentlyEditingId).width"
+              :max="450 - currentlyEditing.width"
               :formatter="value => `${value}px`"
               :parser="value => value.replace('px', '')"
               :disabled="
-                elements.find((e) => e.id === currentlyEditingId).background
+                currentlyEditing.background
                 ||
-                !elements.find((e) => e.id === currentlyEditingId).imageUrl
+                !currentlyEditing.imageUrl
               "
               :style="{ marginLeft: '10px' }"
             />
@@ -648,28 +642,28 @@
         <a-row>
           <a-col :span="11">
             <a-slider
-              v-model="elements.find((e) => e.id === currentlyEditingId).marginY"
+              v-model="currentlyEditing.marginY"
               :min="0"
               :max="100"
               :disabled="
-                elements.find((e) => e.id === currentlyEditingId).background
+                currentlyEditing.background
                 ||
-                !elements.find((e) => e.id === currentlyEditingId).imageUrl
+                !currentlyEditing.imageUrl
               "
               :style="{ marginLeft: '0px' }"
             />
           </a-col>
           <a-col :span="1">
             <a-input-number
-              v-model="elements.find((e) => e.id === currentlyEditingId).marginY"
+              v-model="currentlyEditing.marginY"
               :min="0"
               :max="100"
               :formatter="value => `${value}%`"
               :parser="value => value.replace('%', '')"
               :disabled="
-                elements.find((e) => e.id === currentlyEditingId).background
+                currentlyEditing.background
                 ||
-                !elements.find((e) => e.id === currentlyEditingId).imageUrl
+                !currentlyEditing.imageUrl
               "
               :style="{ marginLeft: '10px' }"
             />
@@ -679,8 +673,8 @@
 
       <!-- Image Position -- Background -->
       <a-button
-        :type="elements.find((e) => e.id === currentlyEditingId).background ? 'primary' : 'default'"
-        :disabled="!elements.find((e) => e.id === currentlyEditingId).imageUrl"
+        :type="currentlyEditing.background ? 'primary' : 'default'"
+        :disabled="!currentlyEditing.imageUrl"
         :style="{ width: '284px', marginTop: '30px' }"
         @click="makeBackground"
         block
@@ -745,6 +739,7 @@
             fontWeight: element.bold ? 'bold' : 'normal',
             fontStyle: element.italic ? 'italic' : 'normal',
             textDecoration: element.underline ? 'underline' : 'none',
+            zIndex: '1',
           }"
         >
           {{ element.text }}
@@ -756,15 +751,16 @@
           :src="element.imageUrl"
           :style="{
             position: 'absolute',
-            maxWidth: '500px',
+            maxWidth: '35vw',
             maxHeight: '100vh',
 
             borderRadius: element.background ? '0' : roundness(element.rounded),
-            width: `${element.background ? '500' : element.width}px`,
+            width: element.background ? '35vw' : `${element.width}px`,
             height: element.background ? '100vh' : 'inherit',
             left: element.background ? '0px' : '',
             marginTop: `${element.background ? '0' : element.marginY}vh`,
             marginLeft: `${element.background ? '0' : element.marginX}px`,
+            zIndex: element.background ? '0' : '1',
           }"
         >
       </span>
@@ -872,7 +868,6 @@ export default {
         loading: false,
         background: false,
         width: 200,
-        height: null,
         marginX: 125,
         marginY: 10,
         rounded: 1,
@@ -884,8 +879,8 @@ export default {
     },
 
     editElement(id) {
-      this.mode = this.elements.find((el) => el.id === id).type;
       this.currentlyEditingId = id;
+      this.mode = this.currentlyEditing.type;
       this.resetSaveButton();
     },
 
@@ -911,12 +906,12 @@ export default {
     // Image
     upload(info) {
       if (info.file.status === 'uploading') {
-        this.elements.find((el) => el.id === this.currentlyEditingId).loading = true;
+        this.currentlyEditing.loading = true;
       } else if (info.file.status === 'done') {
         const { response } = info.file;
-        this.elements.find((el) => el.id === this.currentlyEditingId).imageId = response.id;
-        this.elements.find((el) => el.id === this.currentlyEditingId).imageUrl = response.url;
-        this.elements.find((el) => el.id === this.currentlyEditingId).imageName = response.name;
+        this.currentlyEditing.imageId = response.id;
+        this.currentlyEditing.imageUrl = response.url;
+        this.currentlyEditing.imageName = response.name;
       }
     },
 
@@ -925,8 +920,23 @@ export default {
     },
 
     makeBackground() {
-      const element = this.elements.find((el) => el.id === this.currentlyEditingId);
-      this.elements.find((el) => el.id === this.currentlyEditingId).background = !element;
+      this.currentlyEditing.background = !this.currentlyEditing.background;
+    },
+
+    roundness(border) {
+      switch (border) {
+        case 0:
+          return '0';
+
+        case 1:
+          return '10%';
+
+        case 2:
+          return '100%';
+
+        default:
+          return '0';
+      }
     },
     // END Image
 
@@ -1035,20 +1045,8 @@ export default {
   },
 
   computed: {
-    roundness(border) {
-      switch (border) {
-        case 0:
-          return '0';
-
-        case 1:
-          return '10%';
-
-        case 2:
-          return '100%';
-
-        default:
-          return '0';
-      }
+    currentlyEditing() {
+      return this.elements.find((e) => e.id === this.currentlyEditingId);
     },
   },
 
