@@ -1,4 +1,5 @@
 <template>
+  <!-- show only if loaded -->
   <div
     class="storyViewer"
     :style="{
@@ -25,15 +26,6 @@
       }"
     >
 
-      <!-- Avatar -->
-      <!-- <a-avatar
-        src="https://weneedfun.com/wp-content/uploads/2016/01/Pink-Flower-17.jpg"
-        :style="{ border: 'white 1px solid', margin: '10px' }"
-      />
-      <span :style="{ color: 'white', fontWeight: 'bold' }">
-        username
-      </span> -->
-
       <a-icon
         type="close-circle"
 
@@ -49,12 +41,24 @@
         @click="exit"
       />
 
-      <a-carousel arrows autoplay :before-change="beforeChange">
+      <a-carousel
+        v-if="Object.keys(users).length"
+        :before-change="beforeChange"
+        :after-change="() => {}"
+        :initialSlide="currentUser.startingStoryIndex"
+        autoplay
+        :autoplaySpeed="15000"
+        arrows
+      >
         <!-- Left Arrow -->
         <div
           slot="prevArrow"
           class="custom-slick-arrow"
-          style="left: 10px;zIndex: 1"
+          :disabled="false /* currentUserIndex === 0 */"
+          :style="{
+            left: '10px',
+            zIndex: 1
+          }"
         >
           <a-icon type="left-circle" />
         </div>
@@ -62,14 +66,16 @@
         <div
           slot="nextArrow"
           class="custom-slick-arrow"
-          style="right: 10px"
+          :style="{
+            right: '10px',
+          }"
         >
           <a-icon type="right-circle" />
         </div>
 
         <!-- Stories -->
         <div
-          v-for="(story, storyId) in stories[storyData.currentStoryId].stories"
+          v-for="(story, storyId) in currentUser.stories"
           :key="storyId"
           :style="{
             height: '100vh',
@@ -78,10 +84,24 @@
             background: '#364d79',
           }"
         >
-          <h1>tab {{ storyId }}</h1>
+          <!-- Avatar -->
+          <!--
+          <a-avatar
+            src="https://weneedfun.com/wp-content/uploads/2016/01/Pink-Flower-17.jpg"
+            :style="{ border: 'white 1px solid', margin: '10px' }"
+          />
+          <span :style="{ color: 'white', fontWeight: 'bold' }">
+            username
+          </span>
+          -->
+          <h1>{{ story.text }}</h1>
         </div>
 
       </a-carousel>
+
+      <div v-else>
+        <!-- add skeleton -->
+      </div>
 
     </div>
   </div>
@@ -89,73 +109,119 @@
 </template>
 
 <script>
+import http from '@/axios.config.js';
+// user
+// current user returning an object
+// array of users
+
+// story
+// starting index
+// index of current story
+// id of current story
+
+$(function() {
+  var slides_count;
+  slides_count = $('.slides .slide').length <= 5 ? 0 : 5;
+  $('.slides').slick({
+    slidesToShow: slides_count
+  });
+  if ($('.slides .slide').length <= 5) {
+    return $('.slides .slick-next').addClass('slick-disabled').off('click');
+  }
+});
+
 export default {
   name: 'StoryViewer',
 
   props: {
+    storiesProp: {
+      type: Object,
+      required: true,
+    },
+    startingUserId: {
+      type: Number,
+      required: false,
+    },
   },
 
   data() {
     return {
-      stories: {
-        0: {
-          username: 'user 0',
-          avatar: {
-            color: '',
-          },
-          stories: {
-            0: {},
-            1: {},
-            2: {},
-          },
-        },
-        1: {
-          username: 'user 1',
-          avatar: {
-            color: '',
-          },
-          stories: {
-            0: {},
-            1: {},
-          },
-        },
-      },
-      storyData: {
-        currentPage: 0,
-        currentStoryId: 0,
-        currentStoryLength: null,
-      },
+      users: {},
+      currentUserId: null,
     };
   },
 
   methods: {
+    async getData() {
+      const { data } = await http.get('/stories', {
+        params: this.requestParameters,
+      });
+
+      Object.entries(this.storiesProp).forEach(([_id, user]) => {
+        this.users = {
+          ...this.users,
+          [_id]: {
+            username: user.username,
+            avatar: user.avatar,
+            stories: data.users[_id.toString()],
+            startingStoryIndex: user.startingStoryIndex,
+          },
+        };
+      });
+
+      console.log('Current User: ', this.currentUser);
+    },
+
     beforeChange(from, to) {
-      if (to === 0 && this.storyData.currentPage !== 1) {
-        this.nextUser();
-      } else if (to > 1 && this.storyData.currentPage === 0) {
-        this.proviousUser();
-      }
-      this.storyData.currentPage = to;
+      console.log('from: ', from, ', to: ', to);
+      // send view notification to server
+      // http.post();
+
+      // store viewed stories to be handled on exit
     },
 
-    previousUser() {
-      //  refactor
-      const index = Object.keys(this.stories).indexOf(this.storyData.currentStoryId.toString());
-      this.storyData.currentStoryId = Object.keys(this.stories)[index - 1];
-      this.$forceUpdate();
-      console.log('previous');
-    },
+    async afterChange(/* from, to */) {
+      // send view notification to server
+      // http.post();
 
-    nextUser() {
-      //  refactor
-      const index = Object.keys(this.stories).indexOf(this.storyData.currentStoryId.toString());
-      this.storyData.currentStoryId = Object.keys(this.stories)[index + 1];
-      console.log('next');
+      // store viewed stories to be handled on exit
     },
 
     exit() {
+      console.log(this.userList);
       this.$emit('exit');
     },
+  },
+
+  computed: {
+    requestParameters() {
+      const request = { users: {} };
+      Object.entries(this.storiesProp).forEach(([_id, user]) => {
+        request.users = {
+          ...request.users,
+          [_id]: user.stories,
+        };
+      });
+      return request;
+    },
+
+    userList() {
+      return Object.keys(this.users);
+    },
+
+    currentUser() {
+      return this.users[this.currentUserId];
+    },
+
+    // currentUserIndex() {
+    //   return this.userList.indexOf(this.currentUserId);
+    // },
+
+  },
+
+  created() {
+    this.currentUserId = this.startingUserId;
+    this.getData();
   },
 };
 </script>
@@ -176,3 +242,18 @@ export default {
 }
 
 </style>
+
+<!--
+users: {
+  userId: {
+    username,
+    avatar,
+    startingStoryIndex,
+    stories: {
+      storyId: {
+        data
+      },
+    },
+  },
+}
+-->

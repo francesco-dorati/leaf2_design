@@ -25,18 +25,18 @@
       <a-avatar
         class="story"
         :size="60"
-        :src="userStories.avatar.url"
-        :icon="userStories.avatar.url ? '' : 'user'"
+        :src="user.avatar.url"
+        :icon="user.avatar.url ? '' : 'user'"
         :style="{
           boxSizing: 'border-box',
           margin: '10px',
           marginLeft: '20px',
           cursor: 'pointer',
-          backgroundColor: userStories.avatar.color,
-          border: userStories.stories ? '2px white solid' : '',
-          boxShadow: userStories.stories ? '0 0 0 2.5px #20bf6b' : '',
+          backgroundColor: user.avatar.color,
+          border: user.stories.length ? '2px white solid' : '',
+          boxShadow: user.stories.length ? '0 0 0 2.5px #20bf6b' : '',
         }"
-        @click="viewMyStory"
+        @click="viewMine"
       />
     </a-skeleton>
 
@@ -46,14 +46,14 @@
       shape="circle"
       size="small"
       :style="{ position: 'absolute', top: '47px', left: '293px' }"
-      @click="createStory"
+      @click="create"
     >
       +
     </a-button>
 
     <!-- Unviewed Story -->
     <a-avatar
-      v-for="(user, userId) in unviewedStories"
+      v-for="(user, userId) in uncompletedUsers"
       :size="60"
       :src="user.avatar.url"
       :icon="user.avatar.url ? '' : 'user'"
@@ -66,12 +66,12 @@
         boxShadow: '0 0 0 2.5px #20bf6b',
         backgroundColor: user.avatar.color,
       }"
-      @click="viewStory"
+      @click="viewUncompleted(userId)"
     />
 
     <!-- Viewed Story -->
     <a-avatar
-      v-for="(user, userId) in viewedStories"
+      v-for="(user, userId) in completedUsers"
       :size="60"
       :src="user.avatar.url"
       :icon="user.avatar.url ? '' : 'user'"
@@ -84,7 +84,7 @@
         boxShadow: '0 0 0 2.5px #d1d8e0',
         backgroundColor: user.avatar.color,
       }"
-      @click="viewStory"
+      @click="viewCompleted(userId)"
     />
 
     <!-- Skeleton -->
@@ -105,7 +105,8 @@
 
     <StoryViewer
       v-if="mode === 1"
-      :stories="[]"
+      :storiesProp="viewerProps"
+      :startingUserId="startingUserProp"
       @exit="exit"
     />
 
@@ -133,28 +134,81 @@ export default {
   data() {
     return {
       mode: 0, // 0: normal, 1: story, 2: createStory;
-      userStories: {
+      user: {
         avatar: {
           color: '',
         },
+        stories: [],
       },
-      unviewedStories: {},
-      viewedStories: {},
+      uncompletedUsers: {},
+      completedUsers: {},
       loading: true,
+      viewerProps: {},
+      startingUserProp: null,
     };
   },
 
   methods: {
-    createStory() {
+    create() {
       this.mode = 2;
     },
 
-    viewMyStory() {
+    viewMine() {
+      const { _id } = this.user;
+      this.viewerProps = {
+        [_id]: {
+          username: this.user.username,
+          avatar: this.user.avatar,
+          stories: this.user.stories,
+        },
+      };
+      this.startingUserProp = _id;
       this.mode = 1;
     },
 
-    viewStory() {
+    viewUncompleted(userId) {
+      this.viewerProps = {};
+
+      Object.entries(this.uncompletedUsers).forEach(([_id, user]) => {
+        const stories = [...user.viewedStories, ...user.unviewedStories];
+        this.viewerProps = {
+          ...this.viewerProps,
+          [_id]: {
+            username: user.username,
+            avatar: user.avatar,
+            stories,
+            startingStoryIndex: stories.indexOf(user.unviewedStories[0]),
+          },
+        };
+      });
+
+      this.startingUserProp = Number(userId);
+
       this.mode = 1;
+
+      // console.log(this.viewerProps);
+    },
+
+    viewCompleted(userId) {
+      this.viewerProps = {};
+
+      Object.entries(this.completedUsers).forEach(([_id, user]) => {
+        this.viewerProps = {
+          ...this.viewerProps,
+          [_id]: {
+            username: user.username,
+            avatar: user.avatar,
+            stories: user.stories,
+            startingStoryIndex: 0,
+          },
+        };
+      });
+
+      this.startingUserProp = Number(userId);
+
+      this.mode = 1;
+
+      // console.log(this.viewerProps);
     },
 
     exit() {
@@ -164,12 +218,12 @@ export default {
     async getStories() {
       this.loading = true;
 
-      const { data } = await http.get('/stories/');
+      const { data } = await http.get('/stories/info');
 
       this.loading = false;
-      this.userStories = data.userStories;
-      this.unviewedStories = data.unviewedStories;
-      this.viewedStories = data.viewedStories;
+      this.user = data.user;
+      this.uncompletedUsers = data.uncompletedUsers;
+      this.completedUsers = data.completedUsers;
     },
   },
 
