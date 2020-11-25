@@ -119,11 +119,11 @@ import http from '@/axios.config.js';
 // index of current story
 // id of current story
 
-$(function() {
-  var slides_count;
+$(() => {
+  let slides_count;
   slides_count = $('.slides .slide').length <= 5 ? 0 : 5;
   $('.slides').slick({
-    slidesToShow: slides_count
+    slidesToShow: slides_count,
   });
   if ($('.slides .slide').length <= 5) {
     return $('.slides .slick-next').addClass('slick-disabled').off('click');
